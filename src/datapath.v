@@ -19,6 +19,7 @@ module datapath (
 	output reg wb_wen_exe,  // register write enable signal feedback from EXE stage
 	output reg is_branch_mem,  // whether instruction in MEM stage is jump/branch instruction
 	output reg [4:0] regw_addr_mem,  // register write address from MEM stage
+    output reg [4:0] regw_addr_wb,
 	output reg wb_wen_mem,  // register write enable signal feedback from MEM stage
 	input wire [2:0] pc_src_ctrl,  // how would PC change to next
 	input wire imm_ext_ctrl,  // whether using sign extended to immediate data
@@ -57,7 +58,14 @@ module datapath (
 	// WB signals
 	input wire wb_rst,
 	input wire wb_en,
-	output reg wb_valid
+	output reg wb_valid,
+   //rs and rd address
+    output reg [4:0] addr_rs_id,
+    output reg [4:0] addr_rs_exe,
+    output reg [4:0] addr_rs_mem,
+    output reg [4:0] addr_rt_id,
+    output reg [4:0] addr_rt_exe,
+    output reg [4:0] addr_rt_mem,
 	);
 
 	`include "mips_define.vh"
@@ -103,7 +111,7 @@ module datapath (
 	reg wb_wen_wb;
 	reg [31:0] alu_out_wb;
 	reg [31:0] mem_din_wb;
-	reg [4:0] regw_addr_wb;
+	// reg [4:0] regw_addr_wb;
 	reg [31:0] regw_data_wb;
 
 	// debug
@@ -173,12 +181,16 @@ module datapath (
 			inst_addr_id <= 0;
 			inst_data_id <= 0;
 			inst_addr_next_id <= 0;
+            addr_rs_id<=0;
+            addr_rt_id<=0;
 		end
 		else if (id_en) begin
 			id_valid <= if_valid;
 			inst_addr_id <= inst_addr;
 			inst_data_id <= inst_data;
 			inst_addr_next_id <= inst_addr_next;
+            addr_rs_id<=addr_rs;
+            addr_rt_id<=addr_rt;
 		end
 	end
 
@@ -231,6 +243,8 @@ module datapath (
 			mem_wen_exe <= 0;
 			wb_data_src_exe <= 0;
 			wb_wen_exe <= 0;
+            addr_rs_exe<=0;
+            addr_rt_exe<=0;
 		end
 		else if (exe_en) begin
 			exe_valid <= id_valid;
@@ -249,6 +263,8 @@ module datapath (
 			mem_wen_exe <= mem_wen_ctrl;
 			wb_data_src_exe <= wb_data_src_ctrl;
 			wb_wen_exe <= wb_wen_ctrl;
+            addr_rs_exe<=addr_rs_id;
+            addr_rt_exe<=addr_rt_id;
 		end
 	end
 
@@ -300,6 +316,8 @@ module datapath (
 			wb_data_src_mem <= 0;
 			wb_wen_mem <= 0;
 			rs_rt_equal_mem <= 0;
+            addr_rs_mem<=0;
+            addr_rt_mem<=0;
 		end
 		else if (mem_en) begin
 			mem_valid <= exe_valid;
@@ -316,6 +334,8 @@ module datapath (
 			wb_data_src_mem <= wb_data_src_exe;
 			wb_wen_mem <= wb_wen_exe;
 			rs_rt_equal_mem <= rs_rt_equal_exe;
+            addr_rs_mem<=addr_rs_exe;
+            addr_rt_mem<=addr_rt_exe;
 		end
 	end
 
