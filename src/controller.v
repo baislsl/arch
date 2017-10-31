@@ -20,7 +20,14 @@ module controller (/*AUTOARG*/
 	input wire wb_wen_exe,  // register write enable signal feedback from EXE stage
 	input wire is_branch_mem,  // whether instruction in MEM stage is jump/branch instruction
 	input wire [4:0] regw_addr_mem,  // register write address from MEM stage
-	input wire wb_wen_mem,  // register write enable signal feedback from MEM stage
+	input wire [4:0] regw_addr_wb,	// register wirte address  from WB stage
+	input wire [4:0] addr_rs_exe,
+	input wire [4:0] addr_rt_exe,
+	input wire mem_ren_mem,
+	input wire wb_wen_wb,
+	input wire wb_wen_mem,
+	
+	  // register write enable signal feedback from MEM stage
 	output reg [2:0] pc_src,  // how would PC change to next
 	output reg imm_ext,  // whether using sign extended to immediate data
 	output reg [1:0] exe_a_src,  // data source of operand A for ALU
@@ -225,10 +232,10 @@ module controller (/*AUTOARG*/
 				reg_stall = 1;
 			end
 
-			// AfromMem
-			else if (regw_addr_mem == addr_rs && wb_wen_mem) begin
-				reg_stall = 1;
-			end
+			// // AfromMem
+			// else if (regw_addr_mem == addr_rs && wb_wen_mem) begin
+			// 	reg_stall = 1;
+			// end
 		end
 		if (rt_used && addr_rt != 0) begin
 			// BfromEx
@@ -236,45 +243,44 @@ module controller (/*AUTOARG*/
 				reg_stall = 1;
 			end
 
-			// BfromMem , TODO ?? -> mem instr = instr.writereg
-			else if (regw_addr_mem == addr_rt && wb_wen_mem) begin
-				reg_stall = 1;
-			end
+			// // BfromMem , TODO ?? -> mem instr = instr.writereg
+			// else if (regw_addr_mem == addr_rt && wb_wen_mem) begin
+			// 	reg_stall = 1;
+			// end
 		end
 	end
 
 
 	// TODO: WB.RegisterRd is for?
-	reg [4:0] wb_addr_rd;
-	always @(*) begin
-		case (wb_addr_src)
-			WB_ADDR_RD: wb_addr_rd = inst[15:11]; // 流水线 -> 已经改变， 错的
-			WB_ADDR_RT: wb_addr_rd = addr_rt; //TODO
-			WB_ADDR_LINK: wb_addr_rd = GPR_RA; //TODO
-		endcase
-	end
+	// reg [4:0] wb_addr_rd;
+	// always @(*) begin
+	// 	case (wb_addr_src)
+	// 		WB_ADDR_RD: wb_addr_rd = inst[15:11]; // 流水线 -> 已经改变， 错的
+	// 		WB_ADDR_RT: wb_addr_rd = addr_rt; //TODO
+	// 		WB_ADDR_LINK: wb_addr_rd = GPR_RA; //TODO
+	// 	endcase
+	// end
 
 	always @(*)begin
 		exe_fwd_a_ctrl = 2'b00;
 		exe_fwd_b_ctrl = 2'b00;
 		if (wb_wen_mem && regw_addr_mem != 0 ) begin
-			if(regw_addr_mem == addr_rs)
+			if(regw_addr_mem == addr_rs_exe)
 				exe_fwd_a_ctrl = 2'b01;
-			if(regw_addr_mem == addr_rt)
+			if(regw_addr_mem == addr_rt_exe)
 				exe_fwd_b_ctrl = 2'b01;
-			if(regw_addr_mem == addr_rs && mem_ren)
+			if(regw_addr_mem == addr_rs_exe && mem_ren_mem)
 				exe_fwd_a_ctrl = 2'b10;
-			if(regw_addr_mem == addr_rt && mem_ren)
+			if(regw_addr_mem == addr_rt_exe && mem_ren_mem)
 				exe_fwd_b_ctrl = 2'b10;
 		end 
 		
-		if(wb_wen &&  wb_addr_rd != 0) begin
-			if(regw_addr_mem != addr_rs && wb_addr_rd == addr_rs) 
+		if(wb_wen_wb && regw_addr_wb != 0) begin
+			if(regw_addr_mem != addr_rs_exe && regw_addr_wb == addr_rs_exe) 
 				exe_fwd_a_ctrl = 2'b11;
-			if(regw_addr_mem != addr_rt && wb_addr_rd == addr_rt)
+			if(regw_addr_mem != addr_rt_exe && regw_addr_wb == addr_rt_exe)
 				exe_fwd_b_ctrl = 2'b11;
 		end
-
 	end	
 	
 	always @(*) begin
