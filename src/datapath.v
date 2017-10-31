@@ -25,6 +25,8 @@ module datapath (
 	input wire imm_ext_ctrl,  // whether using sign extended to immediate data
 	input wire [1:0] exe_a_src_ctrl,  // data source of operand A for ALU
 	input wire [1:0] exe_b_src_ctrl,  // data source of operand B for ALU
+    input wire [1:0] exe_fwd_a_ctrl,
+    input wire [1:0] exe_fwd_b_ctrl,
 	input wire [3:0] exe_alu_oper_ctrl,  // ALU operation type
 	input wire mem_ren_ctrl,  // memory read enable signal
 	input wire mem_wen_ctrl,  // memory write enable signal
@@ -75,6 +77,7 @@ module datapath (
 	// control signals
 	reg [2:0] pc_src_exe, pc_src_mem;
 	reg [1:0] exe_a_src_exe, exe_b_src_exe;
+    reg [1:0] exe_fwd_a_exe,exe_fwd_a_exe;
 	reg [3:0] exe_alu_oper_exe;
 	reg mem_wen_exe, mem_wen_mem;
 	reg wb_data_src_exe, wb_data_src_mem, wb_data_src_wb;
@@ -254,6 +257,8 @@ module datapath (
 			pc_src_exe <= pc_src_ctrl;
 			exe_a_src_exe <= exe_a_src_ctrl;
 			exe_b_src_exe <= exe_b_src_ctrl;
+            exe_fwd_a_exe<=exe_fwd_a_ctrl;
+            exe_fwd_b_exe<=exe_fwd_b_ctrl;
 			data_rs_exe <= data_rs;
 			data_rt_exe <= data_rt;
 			data_imm_exe <= data_imm;
@@ -276,8 +281,20 @@ module datapath (
 
 
 	always @(*) begin
-		opa_exe = data_rs_exe;
-		opb_exe = data_rt_exe;
+		// opa_exe = data_rs_exe;
+        case (exe_fwd_a_exe)
+            2'b00: opa_exe=data_rs_exe;
+            2'b01:opa_exe=regw_data_wb;
+            2'b10:opa_exe=mem_din;
+            2'b11:opa_exe=alu_out_mem;
+        endcase
+		// opb_exe = data_rt_exe;
+        case (exe_fwd_b_exe)
+            2'b00:opb_exe=data_rt_exe;
+            2'b01:opb_exe=regw_data_wb;
+            2'b10:opb_exe=mem_din;
+            2'b11:opb_exe=alu_out_mem;
+        endcase
 		case (exe_a_src_exe)
 			EXE_A_RS: opa_exe = data_rs_exe; //TODO
 			EXE_A_LINK: opa_exe = inst_addr_next_exe; //TODO
