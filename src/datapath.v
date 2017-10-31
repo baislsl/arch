@@ -12,11 +12,6 @@ module datapath (
 	input wire [5:0] debug_addr,  // debug address
 	output wire [31:0] debug_data,  // debug data
 	`endif
-
-	// exp4 with bypass
-	input wire [1:0]exe_fwd_a_ctrl,
-	input wire [1:0]exe_fwd_b_ctrl,
-
 	// control signals
 	output reg [31:0] inst_data_id,  // instruction
 	output reg is_branch_exe,  // whether instruction in EXE stage is jump/branch instruction
@@ -246,21 +241,8 @@ module datapath (
 			pc_src_exe <= pc_src_ctrl;
 			exe_a_src_exe <= exe_a_src_ctrl;
 			exe_b_src_exe <= exe_b_src_ctrl;
-			// data_rs_exe <= data_rs;
-			// data_rt_exe <= data_rt;
-			case(exe_fwd_a_ctrl)
-				2'b11: data_rs_exe <= data_rs;
-				2'b10: data_rs_exe <= regw_data_wb;
-				2'b01: data_rs_exe <= mem_din;
-				2'b00: data_rs_exe <= mem_addr;
-			endcase
-			case(exe_fwd_b_ctrl)
-				2'b11:data_rt_exe <= data_rt;
-				2'b10:data_rt_exe <= regw_data_wb;
-				2'b01:data_rt_exe <= mem_din;
-				2'b00:data_rt_exe <= mem_addr;
-			endcase	
-
+			data_rs_exe <= data_rs;
+			data_rt_exe <= data_rt;
 			data_imm_exe <= data_imm;
 			exe_alu_oper_exe <= exe_alu_oper_ctrl;
 			mem_ren_exe <= mem_ren_ctrl;
