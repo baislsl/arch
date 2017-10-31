@@ -13,13 +13,13 @@ module datapath (
 	output wire [31:0] debug_data,  // debug data
 	`endif
 	// control signals
+    reg mem_ren_exe, mem_ren_mem;
 	output reg [31:0] inst_data_id,  // instruction
 	output reg is_branch_exe,  // whether instruction in EXE stage is jump/branch instruction
 	output reg [4:0] regw_addr_exe,  // register write address from EXE stage
 	output reg wb_wen_exe,  // register write enable signal feedback from EXE stage
 	output reg is_branch_mem,  // whether instruction in MEM stage is jump/branch instruction
 	output reg [4:0] regw_addr_mem,  // register write address from MEM stage
-    output reg [4:0] regw_addr_wb,
 	output reg wb_wen_mem,  // register write enable signal feedback from MEM stage
 	input wire [2:0] pc_src_ctrl,  // how would PC change to next
 	input wire imm_ext_ctrl,  // whether using sign extended to immediate data
@@ -59,13 +59,15 @@ module datapath (
 	input wire wb_rst,
 	input wire wb_en,
 	output reg wb_valid,
+    output reg wb_wen_wb;
+    output reg [4:0] regw_addr_wb,
    //rs and rd address
     output reg [4:0] addr_rs_id,
     output reg [4:0] addr_rs_exe,
     output reg [4:0] addr_rs_mem,
     output reg [4:0] addr_rt_id,
     output reg [4:0] addr_rt_exe,
-    output reg [4:0] addr_rt_mem,
+    output reg [4:0] addr_rt_mem
 	);
 
 	`include "mips_define.vh"
@@ -74,7 +76,6 @@ module datapath (
 	reg [2:0] pc_src_exe, pc_src_mem;
 	reg [1:0] exe_a_src_exe, exe_b_src_exe;
 	reg [3:0] exe_alu_oper_exe;
-	reg mem_ren_exe, mem_ren_mem;
 	reg mem_wen_exe, mem_wen_mem;
 	reg wb_data_src_exe, wb_data_src_mem, wb_data_src_wb;
 
@@ -108,10 +109,8 @@ module datapath (
 	reg rs_rt_equal_mem;
 
 	// WB signals
-	reg wb_wen_wb;
 	reg [31:0] alu_out_wb;
 	reg [31:0] mem_din_wb;
-	// reg [4:0] regw_addr_wb;
 	reg [31:0] regw_data_wb;
 
 	// debug

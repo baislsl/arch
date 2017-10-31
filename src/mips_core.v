@@ -26,10 +26,10 @@ module mips_core (
 	output wire [31:0] mem_dout,  // data writing to memory
 	input wire [31:0] mem_din  // data read from memory
 	);
-	
+
 	// control signals
 	wire [31:0] inst_data_ctrl;
-	
+
 	wire [2:0] pc_src_ctrl;
 	wire imm_ext_ctrl;
 	wire [1:0] exe_a_src_ctrl, exe_b_src_ctrl;
@@ -39,21 +39,28 @@ module mips_core (
 	wire [1:0] wb_addr_src_ctrl;
 	wire wb_data_src_ctrl;
 	wire wb_wen_ctrl;
-	
+
 	wire is_branch_exe, is_branch_mem;
 	wire [4:0] regw_addr_exe, regw_addr_mem;
 	wire wb_wen_exe, wb_wen_mem;
-	
+
 	wire if_rst, if_en, if_valid;
 	wire id_rst, id_en, id_valid;
 	wire exe_rst, exe_en, exe_valid;
 	wire mem_rst, mem_en, mem_valid;
 	wire wb_rst, wb_en, wb_valid;
-		
+
 	wire [1:0]exe_fwd_a_ctrl;
 	wire [1:0]exe_fwd_b_ctrl;
 
-	
+    wire [4:0] regw_addr_wb;
+    wire [4:0] addr_rs_exe;
+    wire [4:0] addr_rt_exe,
+   wire mem_ren_mem;
+   wire wb_wen_wb;
+   wire wb_wen_mem;
+
+
 	// controller
 	controller CONTROLLER (
 		.clk(clk),
@@ -96,9 +103,15 @@ module mips_core (
 		.mem_valid(mem_valid),
 		.wb_rst(wb_rst),
 		.wb_en(wb_en),
-		.wb_valid(wb_valid)
+		.wb_valid(wb_valid),
+        .regw_addr_wb(regw_addr_wb),
+        .addr_rs_exe(addr_rs_exe),
+        .addr_rt_exe(addr_rt_exe),
+        .mem_ren_mem(mem_ren_mem),
+        .wb_wen_wb(wb_wen_wb),
+        .wb_wen_mem(wb_wen_mem)
 	);
-	
+
 	// data path
 	datapath DATAPATH (
 		.clk(clk),
@@ -147,7 +160,13 @@ module mips_core (
 		.mem_din(mem_din),
 		.wb_rst(wb_rst),
 		.wb_en(wb_en),
-		.wb_valid(wb_valid)
+		.wb_valid(wb_valid),
+        .regw_addr_wb(regw_addr_wb),
+        .addr_rs_exe(addr_rs_exe),
+        .addr_rt_exe(addr_rt_exe),
+        .mem_ren_mem(mem_ren_mem),
+        .wb_wen_wb(wb_wen_wb),
+        .wb_wen_mem(wb_wen_mem)
 	);
-	
+
 endmodule
