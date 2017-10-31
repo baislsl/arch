@@ -13,7 +13,7 @@ module datapath (
 	output wire [31:0] debug_data,  // debug data
 	`endif
 	// control signals
-   reg mem_ren_exe, mem_ren_mem,
+    output reg mem_ren_mem,
 	output reg [31:0] inst_data_id,  // instruction
 	output reg is_branch_exe,  // whether instruction in EXE stage is jump/branch instruction
 	output reg [4:0] regw_addr_exe,  // register write address from EXE stage
@@ -77,8 +77,9 @@ module datapath (
 	// control signals
 	reg [2:0] pc_src_exe, pc_src_mem;
 	reg [1:0] exe_a_src_exe, exe_b_src_exe;
-    reg [1:0] exe_fwd_a_exe,exe_fwd_a_exe;
+    reg [1:0] exe_fwd_a_exe,exe_fwd_b_exe;
 	reg [3:0] exe_alu_oper_exe;
+	reg mem_ren_exe;
 	reg mem_wen_exe, mem_wen_mem;
 	reg wb_data_src_exe, wb_data_src_mem, wb_data_src_wb;
 
