@@ -55,11 +55,9 @@ module mips_core (
 
     wire [4:0] regw_addr_wb;
     wire [4:0] addr_rs_exe;
-    wire [4:0] addr_rt_exe,
+    wire [4:0] addr_rt_exe;
    wire mem_ren_mem;
    wire wb_wen_wb;
-   wire wb_wen_mem;
-
 
 	// controller
 	controller CONTROLLER (
