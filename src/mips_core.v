@@ -49,6 +49,10 @@ module mips_core (
 	wire exe_rst, exe_en, exe_valid;
 	wire mem_rst, mem_en, mem_valid;
 	wire wb_rst, wb_en, wb_valid;
+		
+	wire [1:0]exe_fwd_a_ctrl;
+	wire [1:0]exe_fwd_b_ctrl;
+
 	
 	// controller
 	controller CONTROLLER (
@@ -58,6 +62,8 @@ module mips_core (
 		.debug_en(debug_en),
 		.debug_step(debug_step),
 		`endif
+		.exe_fwd_a_ctrl(exe_fwd_a_ctrl),
+		.exe_fwd_b_ctrl(exe_fwd_b_ctrl),
 		.inst(inst_data_ctrl),
 		.is_branch_exe(is_branch_exe),
 		.regw_addr_exe(regw_addr_exe),
@@ -100,6 +106,8 @@ module mips_core (
 		.debug_addr(debug_addr[5:0]),
 		.debug_data(debug_data),
 		`endif
+		.exe_fwd_a_ctrl(exe_fwd_a_ctrl),
+		.exe_fwd_b_ctrl(exe_fwd_b_ctrl),
 		.inst_data_id(inst_data_ctrl),
 		.is_branch_exe(is_branch_exe),
 		.regw_addr_exe(regw_addr_exe),

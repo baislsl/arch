@@ -32,6 +32,11 @@ module controller (/*AUTOARG*/
 	output reg wb_data_src,  // data source of data being written back to registers
 	output reg wb_wen,  // register write enable signal
 	output reg unrecognized,  // whether current instruction can not be recognized
+
+	// exp4 with bypass
+	output reg [1:0]exe_fwd_a_ctrl,
+	output reg [1:0]exe_fwd_b_ctrl,
+
 	// pipeline control
 	output reg if_rst,  // stage reset signal
 	output reg if_en,  // stage enable signal
@@ -237,6 +242,40 @@ module controller (/*AUTOARG*/
 			end
 		end
 	end
+
+
+	// TODO: WB.RegisterRd is for?
+	reg [4:0] wb_addr_rd;
+	always @(*) begin
+		case (wb_addr_src)
+			WB_ADDR_RD: wb_addr_rd = inst[15:11]; // 流水线 -> 已经改变， 错的
+			WB_ADDR_RT: wb_addr_rd = addr_rt; //TODO
+			WB_ADDR_LINK: wb_addr_rd = GPR_RA; //TODO
+		endcase
+	end
+
+	always @(*)begin
+		exe_fwd_a_ctrl = 2'b00;
+		exe_fwd_b_ctrl = 2'b00;
+		if (wb_wen_mem && regw_addr_mem != 0 ) begin
+			if(regw_addr_mem == addr_rs)
+				exe_fwd_a_ctrl = 2'b01;
+			if(regw_addr_mem == addr_rt)
+				exe_fwd_b_ctrl = 2'b01;
+			if(regw_addr_mem == addr_rs && mem_ren)
+				exe_fwd_a_ctrl = 2'b10;
+			if(regw_addr_mem == addr_rt && mem_ren)
+				exe_fwd_b_ctrl = 2'b10;
+		end 
+		
+		if(wb_wen &&  wb_addr_rd != 0) begin
+			if(regw_addr_mem != addr_rs && wb_addr_rd == addr_rs) 
+				exe_fwd_a_ctrl = 2'b11;
+			if(regw_addr_mem != addr_rt && wb_addr_rd == addr_rt)
+				exe_fwd_b_ctrl = 2'b11;
+		end
+
+	end	
 	
 	always @(*) begin
 		branch_stall = 0;
@@ -294,5 +333,5 @@ module controller (/*AUTOARG*/
 			id_rst = 1;
 		end
 	end
-	
+
 endmodule
