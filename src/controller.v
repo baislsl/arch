@@ -222,44 +222,7 @@ module controller (/*AUTOARG*/
 	assign
 		addr_rs = inst[25:21],
 		addr_rt = inst[20:16];
-	
-	//  reg_stall
-	always @(*) begin
-		reg_stall = 0;
-		if (rs_used && addr_rs != 0) begin
-			// AfromEx 
-			if (regw_addr_exe == addr_rs && wb_wen_exe) begin
-				reg_stall = 1;
-			end
 
-			// // AfromMem
-			// else if (regw_addr_mem == addr_rs && wb_wen_mem) begin
-			// 	reg_stall = 1;
-			// end
-		end
-		if (rt_used && addr_rt != 0) begin
-			// BfromEx
-			if (regw_addr_exe == addr_rt && wb_wen_exe) begin
-				reg_stall = 1;
-			end
-
-			// // BfromMem , TODO ?? -> mem instr = instr.writereg
-			// else if (regw_addr_mem == addr_rt && wb_wen_mem) begin
-			// 	reg_stall = 1;
-			// end
-		end
-	end
-
-
-	// TODO: WB.RegisterRd is for?
-	// reg [4:0] wb_addr_rd;
-	// always @(*) begin
-	// 	case (wb_addr_src)
-	// 		WB_ADDR_RD: wb_addr_rd = inst[15:11]; // 流水线 -> 已经改变， 错的
-	// 		WB_ADDR_RT: wb_addr_rd = addr_rt; //TODO
-	// 		WB_ADDR_LINK: wb_addr_rd = GPR_RA; //TODO
-	// 	endcase
-	// end
 
 	always @(*)begin
 		exe_fwd_a_ctrl = 2'b00;

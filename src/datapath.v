@@ -64,12 +64,14 @@ module datapath (
     output reg wb_wen_wb,
     output reg [4:0] regw_addr_wb,
    //rs and rd address
-    output reg [4:0] addr_rs_id,
+    output reg [4:0] addr_rs_id,//TODO can be deleted
     output reg [4:0] addr_rs_exe,
     output reg [4:0] addr_rs_mem,
-    output reg [4:0] addr_rt_id,
+    output reg [4:0] addr_rt_id,//TODO can be deleted
     output reg [4:0] addr_rt_exe,
-    output reg [4:0] addr_rt_mem
+    output reg [4:0] addr_rt_mem,
+	 output reg [31:0] fwd_a_data,
+	 output reg [31:0] fwd_b_data
 	);
 
 	`include "mips_define.vh"
@@ -184,16 +186,16 @@ module datapath (
 			inst_addr_id <= 0;
 			inst_data_id <= 0;
 			inst_addr_next_id <= 0;
-            addr_rs_id<=0;
-            addr_rt_id<=0;
+            // addr_rs_id<=0;
+            // addr_rt_id<=0;
 		end
 		else if (id_en) begin
 			id_valid <= if_valid;
 			inst_addr_id <= inst_addr;
 			inst_data_id <= inst_data;
 			inst_addr_next_id <= inst_addr_next;
-            addr_rs_id<=addr_rs;
-            addr_rt_id<=addr_rt;
+            // addr_rs_id<=addr_rs;
+            // addr_rt_id<=addr_rt;
 		end
 	end
 
@@ -268,8 +270,8 @@ module datapath (
 			mem_wen_exe <= mem_wen_ctrl;
 			wb_data_src_exe <= wb_data_src_ctrl;
 			wb_wen_exe <= wb_wen_ctrl;
-            addr_rs_exe<=addr_rs_id;
-            addr_rt_exe<=addr_rt_id;
+            addr_rs_exe<=addr_rs;
+            addr_rt_exe<=addr_rt;
 		end
 	end
 
@@ -278,31 +280,30 @@ module datapath (
 	end
 
 	assign
-		rs_rt_equal_exe = (data_rs_exe == data_rt_exe);
+		rs_rt_equal_exe = (fwd_a_data == fwd_b_data);
 
 
 	always @(*) begin
-		// opa_exe = data_rs_exe;
-        case (exe_fwd_a_exe)
-            2'b00: opa_exe=data_rs_exe;
-            2'b01:opa_exe=regw_data_wb;
-            2'b10:opa_exe=mem_din;
-            2'b11:opa_exe=alu_out_mem;
+        case (exe_fwd_a_ctrl)
+            2'b00: fwd_a_data=data_rs_exe;
+            2'b01:fwd_a_data=alu_out_mem; 
+            2'b10:fwd_a_data=mem_din;
+            2'b11:fwd_a_data=regw_data_wb;
         endcase
-		// opb_exe = data_rt_exe;
-        case (exe_fwd_b_exe)
-            2'b00:opb_exe=data_rt_exe;
-            2'b01:opb_exe=regw_data_wb;
-            2'b10:opb_exe=mem_din;
-            2'b11:opb_exe=alu_out_mem;
+		// opb_exe = data_rt_exe; 
+        case (exe_fwd_b_ctrl)
+            2'b00:fwd_b_data=data_rt_exe;
+            2'b01:fwd_b_data=alu_out_mem;
+            2'b10:fwd_b_data=mem_din;
+            2'b11:fwd_b_data=regw_data_wb;
         endcase
 		case (exe_a_src_exe)
-			EXE_A_RS: opa_exe = data_rs_exe; //TODO
+			EXE_A_RS: opa_exe = fwd_a_data; //TODO
 			EXE_A_LINK: opa_exe = inst_addr_next_exe; //TODO
 			EXE_A_BRANCH: opa_exe = inst_addr_next_exe; //TODO
 		endcase
 		case (exe_b_src_exe)
-			EXE_B_RT: opb_exe = data_rt_exe; //TODO
+			EXE_B_RT: opb_exe = fwd_b_data; //TODO
 			EXE_B_IMM: opb_exe = data_imm_exe;
 			EXE_B_LINK: opb_exe = 0;  // linked address is the next one of current instruction //TODO
 			EXE_B_BRANCH: opb_exe = {data_imm_exe[29:0], 2'b0}; //TODO
@@ -336,15 +337,17 @@ module datapath (
             addr_rs_mem<=0;
             addr_rt_mem<=0;
 		end
-		else if (mem_en) begin
+		else if (mem_en) begin 
 			mem_valid <= exe_valid;
 			pc_src_mem <= pc_src_exe;
 			inst_addr_mem <= inst_addr_exe;
 			inst_data_mem <= inst_data_exe;
 			inst_addr_next_mem <= inst_addr_next_exe;
 			regw_addr_mem <= regw_addr_exe;
-			data_rs_mem <= data_rs_exe;
-			data_rt_mem <= data_rt_exe;
+			//data_rs_mem <= data_rs_exe;
+			data_rs_mem <= fwd_a_data;
+			// data_rt_mem <= data_rt_exe;
+			data_rt_mem <= fwd_b_data;
 			alu_out_mem <= alu_out_exe;
 			mem_ren_mem <= mem_ren_exe;
 			mem_wen_mem <= mem_wen_exe;
@@ -400,7 +403,7 @@ module datapath (
 		regw_data_wb = alu_out_wb;
 		case (wb_data_src_wb)
 			WB_DATA_ALU: regw_data_wb = alu_out_wb; //TODO
-			WB_DATA_MEM: regw_data_wb = mem_din; //TODO
+			WB_DATA_MEM: regw_data_wb = mem_din_wb; //TODO
 		endcase
 	end
 
