@@ -69,6 +69,7 @@ module controller (/*AUTOARG*/
 	reg rs_used, rt_used;
     reg is_load, is_store;
     reg is_load_exe;
+	reg load_stall;
 
     always @ ( posedge clk ) begin
         is_load_exe<=is_load;
@@ -95,7 +96,7 @@ module controller (/*AUTOARG*/
 				case (inst[5:0])
 					R_FUNC_JR: begin
 						pc_src = PC_FWD_DATA;
-                        // fwd_a_ctrl=2'b11; TODO: 
+                        // fwd_a_ctrl=2'b11; TODO: 应该要去掉吧
 						rs_used = 1;
 					end
 					R_FUNC_ADD: begin
@@ -149,7 +150,7 @@ module controller (/*AUTOARG*/
 			INST_JAL: begin
 				pc_src = PC_JUMP;
 				exe_a_src = EXE_A_LINK;
-				// exe_b_src = EXE_B_LINK; TODO 这个地方是不是不需要给exe_b_src赋值了？
+				// exe_b_src = EXE_B_LINK; // TODO: 这个地方是不是不需要给exe_b_src赋值了？-- 我也不确定
 				exe_alu_oper = EXE_ALU_ADD;
 				wb_addr_src = WB_ADDR_LINK;
 				wb_data_src = WB_DATA_ALU;
@@ -227,7 +228,7 @@ module controller (/*AUTOARG*/
 	end
 
 	// pipeline control
-	reg reg_stall;
+//	reg reg_stall;
 	reg branch_stall;
 	wire [4:0] addr_rs, addr_rt;
 
@@ -240,22 +241,23 @@ module controller (/*AUTOARG*/
 		fwd_a_ctrl = 2'b00;
 		fwd_b_ctrl = 2'b00;
         fwd_m = 1'b0;
+		load_stall = 1'b0;
 
 		if (wb_wen_mem && regw_addr_mem != 0 ) begin
-			if(regw_addr_mem == addr_rs_exe)
+			if(regw_addr_exe == addr_rs)
 				fwd_a_ctrl = 2'b01;
-			if(regw_addr_mem == addr_rt_exe)
+			if(regw_addr_exe == addr_rt)
 				fwd_b_ctrl = 2'b01;
-			if(regw_addr_mem == addr_rs_exe && mem_ren_mem)
+			if(regw_addr_mem == addr_rs && mem_ren_mem)
 				fwd_a_ctrl = 2'b10;
-			if(regw_addr_mem == addr_rt_exe && mem_ren_mem)
+			if(regw_addr_mem == addr_rt && mem_ren_mem)
 				fwd_b_ctrl = 2'b10;
 		end
 
 		if(wb_wen_wb && regw_addr_wb != 0) begin
-			if(regw_addr_mem != addr_rs_exe && regw_addr_wb == addr_rs_exe)
+			if(regw_addr_mem != addr_rs && regw_addr_wb == addr_rs)
 				fwd_a_ctrl = 2'b11;
-			if(regw_addr_mem != addr_rt_exe && regw_addr_wb == addr_rt_exe)
+			if(regw_addr_mem != addr_rt && regw_addr_wb == addr_rt)
 				fwd_b_ctrl = 2'b11;
 		end
 
@@ -263,6 +265,10 @@ module controller (/*AUTOARG*/
             fwd_m = 1;
         end
 
+		if((rs_used && regw_addr_exe == addr_rs && wb_wen_exe && is_load_exe)
+			|| (rt_used && regw_addr_exe == addr_rt && wb_wen_exe && is_load_exe && ~is_store)) begin
+			load_stall = 1;
+		end 
 	end
 
 	always @(*) begin
@@ -312,15 +318,20 @@ module controller (/*AUTOARG*/
 		end
 		`endif
 		// this stall indicate that ID is waiting for previous instruction, should insert NOPs between ID and EXE.
-		else if (reg_stall) begin
+		// else if (reg_stall) begin
+		// 	if_en = 0;
+		// 	id_en = 0;
+		// 	exe_rst = 1;
+		// end
+		// // this stall indicate that a jump/branch instruction is running, so that 3 NOP should be inserted between IF and ID
+		// else if (branch_stall) begin
+		// 	id_rst = 1;
+		// end
+		else if(load_stall) begin
 			if_en = 0;
 			id_en = 0;
 			exe_rst = 1;
-		end
-		// this stall indicate that a jump/branch instruction is running, so that 3 NOP should be inserted between IF and ID
-		else if (branch_stall) begin
-			id_rst = 1;
-		end
+		end 
 	end
 
 endmodule

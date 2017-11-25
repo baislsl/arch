@@ -178,7 +178,7 @@ module datapath (
                 PC_NEXT: inst_addr<=inst_addr_next;
                 PC_FWD_DATA: inst_addr<=fwd_a_data;
                 PC_JUMP: inst_addr<={inst_addr_id[31:28],inst_data_id[25:0], 2'b0};
-                PC_BRANCH: inst_addr<=inst_addr_next+(data_imm<<2);	// TODO
+                PC_BRANCH: inst_addr<=inst_addr_next_id+(data_imm<<2);	
             endcase
 			// if (is_branch_mem)//TODO pc select
 			// 	inst_addr <= branch_target_mem;
@@ -289,19 +289,21 @@ module datapath (
 
 
 	always @(*) begin
+		// id state
         case (fwd_a_ctrl)
-            2'b00: fwd_a_data=data_rs_exe;
+            2'b00: fwd_a_data=data_rs;
             2'b01:fwd_a_data=alu_out_exe;
             2'b10:fwd_a_data=alu_out_mem;
             2'b11:fwd_a_data=mem_din;
         endcase
-		// opb_exe = data_rt_exe;
         case (fwd_b_ctrl)
-            2'b00:fwd_b_data=data_rt_exe;
+            2'b00:fwd_b_data=data_rt;
             2'b01:fwd_b_data=alu_out_exe;
             2'b10:fwd_b_data=alu_out_mem;
             2'b11:fwd_b_data=mem_din;
         endcase
+
+		// exe state
 		case (exe_a_src_exe)
 			EXE_A_FWD_DATA: opa_exe = fwd_a_data_exe;
 			EXE_A_LINK: opa_exe = inst_addr_next_exe;
