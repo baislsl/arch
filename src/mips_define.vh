@@ -1,24 +1,23 @@
 // PC sources
 localparam
 	PC_NEXT    = 0,
-	PC_JUMP    = 1,
-	PC_JR      = 2,
-	PC_BEQ     = 4,
-	PC_BNE     = 5;
+    PC_FWD_DATA = 1,
+	PC_JUMP    = 2,
+    PC_BRANCH = 3;
+	// PC_JR      = 2,
+	// PC_BEQ     = 4,
+	// PC_BNE     = 5;
 
 // EXE A sources
 localparam
-	EXE_A_RS     = 0,
-	//EXE_A_SA     = 1,
-	EXE_A_LINK   = 2,
-	EXE_A_BRANCH = 3;
+    EXE_A_FWD_DATA = 0,
+	EXE_A_LINK   = 1;
 
 // EXE B sources
 localparam
-	EXE_B_RT     = 0,
-	EXE_B_IMM    = 1,
-	EXE_B_LINK   = 2,
-	EXE_B_BRANCH = 3;
+    EXE_B_FWD_DATA = 2,
+    EXE_B_FOUR = 1,
+	EXE_B_IMM    = 0;
 
 // EXE ALU operations
 localparam

@@ -40,7 +40,6 @@ module mips_core (
 	wire wb_data_src_ctrl;
 	wire wb_wen_ctrl;
 
-	wire is_branch_exe, is_branch_mem;
 	wire [4:0] regw_addr_exe, regw_addr_mem;
 	wire wb_wen_exe, wb_wen_mem;
 
@@ -50,14 +49,17 @@ module mips_core (
 	wire mem_rst, mem_en, mem_valid;
 	wire wb_rst, wb_en, wb_valid;
 
-	wire [1:0]exe_fwd_a_ctrl;
-	wire [1:0]exe_fwd_b_ctrl;
+	wire [1:0]fwd_a_ctrl;
+	wire [1:0]fwd_b_ctrl;
 
     wire [4:0] regw_addr_wb;
     wire [4:0] addr_rs_exe;
     wire [4:0] addr_rt_exe;
    wire mem_ren_mem;
    wire wb_wen_wb;
+
+   wire a_b_equal;
+   wire fwd_m;
 
 	// controller
 	controller CONTROLLER (
@@ -67,13 +69,11 @@ module mips_core (
 		.debug_en(debug_en),
 		.debug_step(debug_step),
 		`endif
-		.exe_fwd_a_ctrl(exe_fwd_a_ctrl),
-		.exe_fwd_b_ctrl(exe_fwd_b_ctrl),
+		.fwd_a_ctrl(fwd_a_ctrl),
+		.fwd_b_ctrl(fwd_b_ctrl),
 		.inst(inst_data_ctrl),
-		.is_branch_exe(is_branch_exe),
 		.regw_addr_exe(regw_addr_exe),
 		.wb_wen_exe(wb_wen_exe),
-		.is_branch_mem(is_branch_mem),
 		.regw_addr_mem(regw_addr_mem),
 		.pc_src(pc_src_ctrl),
 		.imm_ext(imm_ext_ctrl),
@@ -106,7 +106,9 @@ module mips_core (
         .addr_rt_exe(addr_rt_exe),
         .mem_ren_mem(mem_ren_mem),
         .wb_wen_wb(wb_wen_wb),
-        .wb_wen_mem(wb_wen_mem)
+        .wb_wen_mem(wb_wen_mem),
+        .a_b_equal(a_b_equal),
+        .fwd_m(fwd_m)
 	);
 
 	// data path
@@ -116,13 +118,11 @@ module mips_core (
 		.debug_addr(debug_addr[5:0]),
 		.debug_data(debug_data),
 		`endif
-		.exe_fwd_a_ctrl(exe_fwd_a_ctrl),
-		.exe_fwd_b_ctrl(exe_fwd_b_ctrl),
+		.fwd_a_ctrl(fwd_a_ctrl),
+		.fwd_b_ctrl(fwd_b_ctrl),
 		.inst_data_id(inst_data_ctrl),
-		.is_branch_exe(is_branch_exe),
 		.regw_addr_exe(regw_addr_exe),
 		.wb_wen_exe(wb_wen_exe),
-		.is_branch_mem(is_branch_mem),
 		.regw_addr_mem(regw_addr_mem),
 		.pc_src_ctrl(pc_src_ctrl),
 		.imm_ext_ctrl(imm_ext_ctrl),
@@ -162,7 +162,9 @@ module mips_core (
         .addr_rt_exe(addr_rt_exe),
         .mem_ren_mem(mem_ren_mem),
         .wb_wen_wb(wb_wen_wb),
-        .wb_wen_mem(wb_wen_mem)
+        .wb_wen_mem(wb_wen_mem),
+        .a_b_equal(a_b_equal),
+        .fwd_m(fwd_m)
 	);
 
 endmodule

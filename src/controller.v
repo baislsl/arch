@@ -15,10 +15,8 @@ module controller (/*AUTOARG*/
 	`endif
 	// instruction decode
 	input wire [31:0] inst,  // instruction
-	input wire is_branch_exe,  // whether instruction in EXE stage is jump/branch instruction
 	input wire [4:0] regw_addr_exe,  // register write address from EXE stage
 	input wire wb_wen_exe,  // register write enable signal feedback from EXE stage
-	input wire is_branch_mem,  // whether instruction in MEM stage is jump/branch instruction
 	input wire [4:0] regw_addr_mem,  // register write address from MEM stage
 	input wire [4:0] regw_addr_wb,	// register wirte address  from WB stage
 	input wire [4:0] addr_rs_exe,
@@ -26,7 +24,7 @@ module controller (/*AUTOARG*/
 	input wire mem_ren_mem,
 	input wire wb_wen_wb,
 	input wire wb_wen_mem,
-	
+
 	  // register write enable signal feedback from MEM stage
 	output reg [2:0] pc_src,  // how would PC change to next
 	output reg imm_ext,  // whether using sign extended to immediate data
@@ -41,8 +39,8 @@ module controller (/*AUTOARG*/
 	output reg unrecognized,  // whether current instruction can not be recognized
 
 	// exp4 with bypass
-	output reg [1:0]exe_fwd_a_ctrl,
-	output reg [1:0]exe_fwd_b_ctrl,
+	output reg [1:0]fwd_a_ctrl,
+	output reg [1:0]fwd_b_ctrl,
 
 	// pipeline control
 	output reg if_rst,  // stage reset signal
@@ -59,33 +57,45 @@ module controller (/*AUTOARG*/
 	input wire mem_valid,
 	output reg wb_rst,
 	output reg wb_en,
-	input wire wb_valid
+	input wire wb_valid,
+
+    input wire a_b_equal,
+    output reg fwd_m
 	);
-	
+
 	`include "mips_define.vh"
-	
+
 	// instruction decode
 	reg rs_used, rt_used;
-	
+    reg is_load, is_store;
+    reg is_load_exe;
+
+    always @ ( posedge clk ) begin
+        is_load_exe<=is_load;
+    end
+
 	always @(*) begin
 		pc_src = PC_NEXT;
 		imm_ext = 0;
-		exe_a_src = EXE_A_RS;
-		exe_b_src = EXE_B_RT;
+		exe_a_src = EXE_A_FWD_DATA;
+		exe_b_src = EXE_B_FWD_DATA;
 		exe_alu_oper = EXE_ALU_ADD;
 		mem_ren = 0;
 		mem_wen = 0;
 		wb_addr_src = WB_ADDR_RD;
-		wb_data_src = WB_DATA_ALU;	
+		wb_data_src = WB_DATA_ALU;
 		wb_wen = 0;
 		rs_used = 0;
 		rt_used = 0;
+        is_load = 0;
+        is_store = 0;
 		unrecognized = 0;
 		case (inst[31:26])
 			INST_R: begin
 				case (inst[5:0])
 					R_FUNC_JR: begin
-						pc_src = PC_JR;
+						pc_src = PC_FWD_DATA;
+                        fwd_a_ctrl=2'b11;
 						rs_used = 1;
 					end
 					R_FUNC_ADD: begin
@@ -139,25 +149,25 @@ module controller (/*AUTOARG*/
 			INST_JAL: begin
 				pc_src = PC_JUMP;
 				exe_a_src = EXE_A_LINK;
-				exe_b_src = EXE_B_LINK;
+				// exe_b_src = EXE_B_LINK; TODO 这个地方是不是不需要给exe_b_src赋值了？
 				exe_alu_oper = EXE_ALU_ADD;
 				wb_addr_src = WB_ADDR_LINK;
 				wb_data_src = WB_DATA_ALU;
 				wb_wen = 1;
 			end
 			INST_BEQ: begin
-				pc_src = PC_BEQ;
-				exe_a_src = EXE_A_BRANCH;
-				exe_b_src = EXE_B_BRANCH;
+				pc_src = a_b_equal?PC_BRANCH:PC_NEXT;
+				exe_a_src = EXE_A_FWD_DATA;//TODO 不太确定
+				exe_b_src = EXE_B_FOUR;
 				exe_alu_oper = EXE_ALU_ADD;
 				imm_ext = 1;
 				rs_used = 1;
 				rt_used = 1;
 			end
 			INST_BNE: begin
-				pc_src = PC_BNE;
-				exe_a_src = EXE_A_BRANCH;
-				exe_b_src = EXE_B_BRANCH;
+				pc_src = a_b_equal?PC_NEXT:PC_BRANCH;
+				exe_a_src = EXE_A_FWD_DATA;//TODO 不太确定
+				exe_b_src = EXE_B_FOUR;
 				exe_alu_oper = EXE_ALU_ADD;
 				imm_ext = 1;
 				rs_used = 1;
@@ -199,6 +209,7 @@ module controller (/*AUTOARG*/
 				wb_data_src = WB_DATA_MEM;
 				wb_wen = 1;
 				rs_used = 1;
+                is_load = 1;
 			end
 			INST_SW: begin
 				imm_ext = 1;
@@ -207,62 +218,71 @@ module controller (/*AUTOARG*/
 				mem_wen = 1;
 				rs_used = 1;
 				rt_used = 1;
+                is_store = 1;
 			end
 			default: begin
 				unrecognized = 1;
 			end
 		endcase
 	end
-	
+
 	// pipeline control
 	reg reg_stall;
 	reg branch_stall;
 	wire [4:0] addr_rs, addr_rt;
-	
+
 	assign
 		addr_rs = inst[25:21],
 		addr_rt = inst[20:16];
 
 
 	always @(*)begin
-		exe_fwd_a_ctrl = 2'b00;
-		exe_fwd_b_ctrl = 2'b00;
+		fwd_a_ctrl = 2'b00;
+		fwd_b_ctrl = 2'b00;
+        fwd_m = 1'b0;
+
 		if (wb_wen_mem && regw_addr_mem != 0 ) begin
 			if(regw_addr_mem == addr_rs_exe)
-				exe_fwd_a_ctrl = 2'b01;
+				fwd_a_ctrl = 2'b01;
 			if(regw_addr_mem == addr_rt_exe)
-				exe_fwd_b_ctrl = 2'b01;
+				fwd_b_ctrl = 2'b01;
 			if(regw_addr_mem == addr_rs_exe && mem_ren_mem)
-				exe_fwd_a_ctrl = 2'b10;
+				fwd_a_ctrl = 2'b10;
 			if(regw_addr_mem == addr_rt_exe && mem_ren_mem)
-				exe_fwd_b_ctrl = 2'b10;
-		end 
-		
-		if(wb_wen_wb && regw_addr_wb != 0) begin
-			if(regw_addr_mem != addr_rs_exe && regw_addr_wb == addr_rs_exe) 
-				exe_fwd_a_ctrl = 2'b11;
-			if(regw_addr_mem != addr_rt_exe && regw_addr_wb == addr_rt_exe)
-				exe_fwd_b_ctrl = 2'b11;
+				fwd_b_ctrl = 2'b10;
 		end
-	end	
-	
+
+		if(wb_wen_wb && regw_addr_wb != 0) begin
+			if(regw_addr_mem != addr_rs_exe && regw_addr_wb == addr_rs_exe)
+				fwd_a_ctrl = 2'b11;
+			if(regw_addr_mem != addr_rt_exe && regw_addr_wb == addr_rt_exe)
+				fwd_b_ctrl = 2'b11;
+		end
+
+        if(rt_used && regw_addr_exe==addr_rt && wb_wen_exe && is_load_exe && is_store) begin
+            fwd_m = 1;
+        end
+
+	end
+
 	always @(*) begin
-		branch_stall = 0;
+    //TODO 原来的branch stall的逻辑，删掉了
+		// branch_stall = 0;
 		// ID Stage for BEQ INSTR 	: pc_src != PC_NEXT
 		// EXE Stage for BEQ INSTR 	: is_branch_exe
-		// MEM Stage for BEQ INSTR 	: is_branch_mem	 
-		if (pc_src != PC_NEXT || is_branch_exe || is_branch_mem)
-			branch_stall = 1;
+		// MEM Stage for BEQ INSTR 	: is_branch_mem
+		// if (pc_src != PC_NEXT || is_branch_exe || is_branch_mem)
+			// branch_stall = 1;
 	end
-	
+
 	`ifdef DEBUG
 	reg debug_step_prev;
-	
+
 	always @(posedge clk) begin
 		debug_step_prev <= debug_step;
 	end
 	`endif
-	
+
 	always @(*) begin
 		if_rst = 0;
 		if_en = 1;
