@@ -62,10 +62,10 @@ module datapath (
     output reg wb_wen_wb,
     output reg [4:0] regw_addr_wb,
    //rs and rd address
-    output reg [4:0] addr_rs_id, can be deleted
+    output reg [4:0] addr_rs_id,// can be deleted
     output reg [4:0] addr_rs_exe,
     output reg [4:0] addr_rs_mem,
-    output reg [4:0] addr_rt_id, can be deleted
+    output reg [4:0] addr_rt_id, //can be deleted
     output reg [4:0] addr_rt_exe,
     output reg [4:0] addr_rt_mem,
 	 output reg [31:0] fwd_a_data,
@@ -74,7 +74,7 @@ module datapath (
      output reg [31:0] fwd_b_data_exe,
 
      output wire a_b_equal,
-     input wire fwd_m;
+     input wire fwd_m
 	);
 
 	`include "mips_define.vh"
@@ -178,12 +178,12 @@ module datapath (
                 PC_NEXT: inst_addr<=inst_addr_next;
                 PC_FWD_DATA: inst_addr<=fwd_a_data;
                 PC_JUMP: inst_addr<={inst_addr_id[31:28],inst_data_id[25:0], 2'b0};
-                PC_BRANCH: inst_addr<=inst_addr_next+(imm_ext<<2);
+                PC_BRANCH: inst_addr<=inst_addr_next+(data_imm<<2);	// TODO
             endcase
-			if (is_branch_mem)//TODO pc select
-				inst_addr <= branch_target_mem;
-			else
-				inst_addr <= inst_addr_next;
+			// if (is_branch_mem)//TODO pc select
+			// 	inst_addr <= branch_target_mem;
+			// else
+			// 	inst_addr <= inst_addr_next;
 		end
 	end
 

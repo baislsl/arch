@@ -95,7 +95,7 @@ module controller (/*AUTOARG*/
 				case (inst[5:0])
 					R_FUNC_JR: begin
 						pc_src = PC_FWD_DATA;
-                        fwd_a_ctrl=2'b11;
+                        // fwd_a_ctrl=2'b11; TODO: 
 						rs_used = 1;
 					end
 					R_FUNC_ADD: begin
