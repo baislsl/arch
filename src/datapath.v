@@ -305,8 +305,8 @@ module datapath (
 
 		// exe state
 		case (exe_a_src_exe)
-			EXE_A_FWD_DATA: opa_exe = fwd_a_data_exe;
-			EXE_A_LINK: opa_exe = inst_addr_next_exe;
+			EXE_A_FWD_DATA: opa_exe = fwd_a_data_exe;	
+			EXE_A_LINK: opa_exe = inst_addr_next_exe;	// JAL
 		endcase
 		case (exe_b_src_exe)
 			EXE_B_FWD_DATA: opb_exe = fwd_b_data_exe;
@@ -378,7 +378,7 @@ module datapath (
 	assign
 		mem_ren = mem_ren_mem,
 		mem_wen = mem_wen_mem,
-		mem_addr = alu_out_mem,
+		mem_addr = alu_out_mem,	
 		mem_dout = fwd_m_mem ? regw_data_wb : data_rt_mem;
 
 	// WB stage

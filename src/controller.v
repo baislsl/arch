@@ -150,7 +150,7 @@ module controller (/*AUTOARG*/
 			INST_JAL: begin
 				pc_src = PC_JUMP;
 				exe_a_src = EXE_A_LINK;
-				// exe_b_src = EXE_B_LINK; // TODO: 这个地方是不是不需要给exe_b_src赋值了？-- 我也不确定
+				exe_b_src = EXE_B_FOUR; // TODO: 这个地方是不是不需要给exe_b_src赋值了？-- 我也不确定
 				exe_alu_oper = EXE_ALU_ADD;
 				wb_addr_src = WB_ADDR_LINK;
 				wb_data_src = WB_DATA_ALU;
@@ -243,23 +243,30 @@ module controller (/*AUTOARG*/
         fwd_m = 1'b0;
 		load_stall = 1'b0;
 
-		if (wb_wen_mem && regw_addr_mem != 0 ) begin
+		if(wb_wen_exe && regw_addr_exe != 0) begin
 			if(regw_addr_exe == addr_rs)
 				fwd_a_ctrl = 2'b01;
 			if(regw_addr_exe == addr_rt)
 				fwd_b_ctrl = 2'b01;
-			if(regw_addr_mem == addr_rs && mem_ren_mem)
-				fwd_a_ctrl = 2'b10;
-			if(regw_addr_mem == addr_rt && mem_ren_mem)
-				fwd_b_ctrl = 2'b10;
 		end
 
-		if(wb_wen_wb && regw_addr_wb != 0) begin
-			if(regw_addr_mem != addr_rs && regw_addr_wb == addr_rs)
+		if (wb_wen_mem && regw_addr_mem != 0 ) begin
+			if(regw_addr_mem == addr_rs)
+				fwd_a_ctrl = 2'b10;
+			if(regw_addr_mem == addr_rt)
+				fwd_b_ctrl = 2'b10;
+			if(regw_addr_mem == addr_rs && mem_ren_mem)
 				fwd_a_ctrl = 2'b11;
-			if(regw_addr_mem != addr_rt && regw_addr_wb == addr_rt)
+			if(regw_addr_mem == addr_rt && mem_ren_mem)
 				fwd_b_ctrl = 2'b11;
 		end
+
+		// if(wb_wen_wb && regw_addr_wb != 0) begin
+		// 	if(regw_addr_mem != addr_rs && regw_addr_wb == addr_rs)
+		// 		fwd_a_ctrl = 2'b11;
+		// 	if(regw_addr_mem != addr_rt && regw_addr_wb == addr_rt)
+		// 		fwd_b_ctrl = 2'b11;
+		// end
 
         if(rt_used && regw_addr_exe==addr_rt && wb_wen_exe && is_load_exe && is_store) begin
             fwd_m = 1;
