@@ -350,9 +350,9 @@ module datapath (
 			inst_addr_next_mem <= inst_addr_next_exe;
 			regw_addr_mem <= regw_addr_exe;
 			//data_rs_mem <= data_rs_exe;
-			data_rs_mem <= fwd_a_data;
+			data_rs_mem <= fwd_a_data_exe;
 			// data_rt_mem <= data_rt_exe;
-			data_rt_mem <= fwd_b_data;
+			data_rt_mem <= fwd_b_data_exe;
 			alu_out_mem <= alu_out_exe;
 			mem_ren_mem <= mem_ren_exe;
 			mem_wen_mem <= mem_wen_exe;
