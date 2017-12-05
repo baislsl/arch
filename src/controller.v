@@ -389,6 +389,13 @@ module controller (/*AUTOARG*/
 		fwd_b_ctrl = 2'b00;
         fwd_m = 1'b0;
 		load_stall = 1'b0;
+		
+		if (wb_wen_mem && regw_addr_mem != 0) begin
+			if(regw_addr_mem == addr_rs)
+				fwd_a_ctrl = 2'b10;
+			if(regw_addr_mem == addr_rt)
+				fwd_b_ctrl = 2'b10;
+		end
 
 		if(wb_wen_exe && regw_addr_exe != 0) begin
 			if(regw_addr_exe == addr_rs)
@@ -397,23 +404,12 @@ module controller (/*AUTOARG*/
 				fwd_b_ctrl = 2'b01;
 		end
 
-		else if (wb_wen_mem && regw_addr_mem != 0 ) begin
-			if(regw_addr_mem == addr_rs)
-				fwd_a_ctrl = 2'b10;
-			if(regw_addr_mem == addr_rt)
-				fwd_b_ctrl = 2'b10;
+		if (wb_wen_mem && regw_addr_mem != 0) begin	// after load stall
 			if(regw_addr_mem == addr_rs && mem_ren_mem)
 				fwd_a_ctrl = 2'b11;
 			if(regw_addr_mem == addr_rt && mem_ren_mem)
 				fwd_b_ctrl = 2'b11;
 		end
-
-		// if(wb_wen_wb && regw_addr_wb != 0) begin
-		// 	if(regw_addr_mem != addr_rs && regw_addr_wb == addr_rs)
-		// 		fwd_a_ctrl = 2'b11;
-		// 	if(regw_addr_mem != addr_rt && regw_addr_wb == addr_rt)
-		// 		fwd_b_ctrl = 2'b11;
-		// end
 
         if(rt_used && regw_addr_exe==addr_rt && wb_wen_exe && is_load_exe && is_store) begin
             fwd_m = 1;
