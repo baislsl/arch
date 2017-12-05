@@ -106,6 +106,7 @@ module datapath (
 	reg [31:0] opa_exe, opb_exe;
 	wire [31:0] alu_out_exe;
     reg fwd_m_exe;
+	reg alu_sign_exe;
 
 	// MEM signals
 	reg [31:0] inst_addr_mem;
@@ -261,6 +262,7 @@ module datapath (
             addr_rt_exe<=0;
             fwd_a_data_exe<=0;
             fwd_b_data_exe<=0;
+			alu_sign_exe<=0;
 		end
 		else if (exe_en) begin
 			exe_valid <= id_valid;
@@ -283,6 +285,7 @@ module datapath (
             fwd_a_data_exe<=fwd_a_data;
             fwd_b_data_exe<=fwd_b_data;
             fwd_m_exe<=fwd_m;
+			alu_sign_exe<=alu_sign;
 		end
 	end
 
@@ -324,7 +327,7 @@ module datapath (
 		.b(opb_exe),
 		.oper(exe_alu_oper_exe),
 		.result(alu_out_exe),
-        .sign(alu_sign)
+        .sign(alu_sign_exe)
 		);
 
 	// MEM stage

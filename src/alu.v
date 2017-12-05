@@ -46,9 +46,9 @@ module alu (
             end
             EXE_ALU_SR: begin
                 if(sign)
-                    result = b >>> a;//arithmetic
+                    result = $signed(b) >>> a;//arithmetic
                 else
-                    result = b >> a;//logic
+                    result = $unsigned(b) >> a;//logic
             end
             EXE_ALU_LUI: begin
                 result = {b[15:0],16'b0};

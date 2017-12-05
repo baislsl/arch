@@ -11,7 +11,7 @@ localparam
 // EXE A sources
 localparam
     EXE_A_FWD_DATA = 0,
-	EXE_A_LINK   = 1;
+	EXE_A_LINK   = 1,
 	EXE_A_SHIFT = 2;
 // EXE B sources
 localparam
@@ -26,7 +26,7 @@ localparam
 	EXE_ALU_SLT    = 2,
 	EXE_ALU_LUI    = 3,
 	EXE_ALU_AND    = 4,
-	EXE_ALU_OR     = 5;
+	EXE_ALU_OR     = 5,
 	EXE_ALU_XOR    = 6,
 	EXE_ALU_NOR    = 7,
 	EXE_ALU_SL     = 8,

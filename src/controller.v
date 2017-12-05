@@ -62,7 +62,7 @@ module controller (/*AUTOARG*/
     input wire a_b_equal,
     output reg fwd_m,
 
-    output reg alu_sign
+    output reg sign
 	);
 
 	`include "mips_define.vh"
@@ -92,7 +92,7 @@ module controller (/*AUTOARG*/
 		rt_used = 0;
         is_load = 0;
         is_store = 0;
-        alu_sign = 0;
+        sign = 0;
 		unrecognized = 0;
 		case (inst[31:26])
 			INST_R: begin
@@ -178,7 +178,7 @@ module controller (/*AUTOARG*/
 					end
                     R_FUNC_SLTU: begin
 						exe_alu_oper = EXE_ALU_SLT;
-                        alu_sign = 1;
+                        sign = 1;
 						wb_addr_src = WB_ADDR_RD;
 						wb_data_src = WB_DATA_ALU;
 						wb_wen = 1;
@@ -293,9 +293,9 @@ module controller (/*AUTOARG*/
                 //without overflow
 			end
 			INST_ANDI: begin
-				imm_ext = 1;
+				imm_ext =0;
 				exe_b_src = EXE_B_IMM;
-				exe_alu_oper = EXE_ALU_ADD;
+				exe_alu_oper = EXE_ALU_AND;
 				wb_addr_src = WB_ADDR_RT;
 				wb_data_src = WB_DATA_ALU;
 				wb_wen = 1;
@@ -330,7 +330,7 @@ module controller (/*AUTOARG*/
                 sign = 1;
 			end
             INST_SLTIU: begin
-				imm_ext = 0;
+				imm_ext = 1;
 				exe_b_src = EXE_B_IMM;
 				exe_alu_oper = EXE_ALU_SLT;
 				wb_addr_src = WB_ADDR_RT;
@@ -362,9 +362,10 @@ module controller (/*AUTOARG*/
             INST_LUI: begin
 				exe_b_src = EXE_B_IMM;
 				exe_alu_oper = EXE_ALU_LUI;
+				wb_wen = 1;
 				rt_used = 1;
                 wb_wen = 1;
-                wb_addr_src =  WB_ADDR_RD;
+                wb_addr_src =  WB_ADDR_RT;
                 wb_data_src = WB_DATA_ALU;
 			end
 			default: begin
@@ -396,7 +397,7 @@ module controller (/*AUTOARG*/
 				fwd_b_ctrl = 2'b01;
 		end
 
-		if (wb_wen_mem && regw_addr_mem != 0 ) begin
+		else if (wb_wen_mem && regw_addr_mem != 0 ) begin
 			if(regw_addr_mem == addr_rs)
 				fwd_a_ctrl = 2'b10;
 			if(regw_addr_mem == addr_rt)

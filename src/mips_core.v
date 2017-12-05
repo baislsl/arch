@@ -111,7 +111,7 @@ module mips_core (
         .wb_wen_mem(wb_wen_mem),
         .a_b_equal(a_b_equal),
         .fwd_m(fwd_m),
-        .alu_sign(alu_sign)
+        .sign(alu_sign)
 	);
 
 	// data path
