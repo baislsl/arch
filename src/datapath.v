@@ -307,6 +307,7 @@ module datapath (
 		case (exe_a_src_exe)
 			EXE_A_FWD_DATA: opa_exe = fwd_a_data_exe;	
 			EXE_A_LINK: opa_exe = inst_addr_next_exe;	// JAL
+			EXE_A_LUI: opa_exe = {data_imm_exe[31:16], 16'b0};
 		endcase
 		case (exe_b_src_exe)
 			EXE_B_FWD_DATA: opb_exe = fwd_b_data_exe;
