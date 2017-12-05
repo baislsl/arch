@@ -61,6 +61,8 @@ module mips_core (
    wire a_b_equal;
    wire fwd_m;
 
+   wire alu_sign;
+
 	// controller
 	controller CONTROLLER (
 		.clk(clk),
@@ -108,7 +110,8 @@ module mips_core (
         .wb_wen_wb(wb_wen_wb),
         .wb_wen_mem(wb_wen_mem),
         .a_b_equal(a_b_equal),
-        .fwd_m(fwd_m)
+        .fwd_m(fwd_m),
+        .alu_sign(alu_sign)
 	);
 
 	// data path
@@ -164,7 +167,8 @@ module mips_core (
         .wb_wen_wb(wb_wen_wb),
         .wb_wen_mem(wb_wen_mem),
         .a_b_equal(a_b_equal),
-        .fwd_m(fwd_m)
+        .fwd_m(fwd_m),
+        .alu_sign(alu_sign)
 	);
 
 endmodule

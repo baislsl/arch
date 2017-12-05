@@ -8,11 +8,12 @@
 module alu (
 	input wire [31:0] a, b,  // two operands
 	input wire [3:0] oper,  // operation type
-	output reg [31:0] result  // calculation result
+	output reg [31:0] result,  // calculation result
+    input wire sign
 	);
-	
+
 	`include "mips_define.vh"
-	
+
 	always @(*) begin
 		result = 0;
 		case (oper)
@@ -23,7 +24,10 @@ module alu (
 				result = a - b;
 			end
 			EXE_ALU_SLT: begin
-				result = $signed(a) < $signed(b);
+                if (sign)
+			        result = $signed(a) < $signed(b);
+                else
+                    result = $unsigned(a) < $unsigned(b);
 			end
 			EXE_ALU_AND: begin
 				result = a & b;
@@ -31,7 +35,25 @@ module alu (
 			EXE_ALU_OR: begin
 				result = a | b;
 			end
+            EXE_ALU_XOR: begin
+				result = a ^ b;
+			end
+            EXE_ALU_NOR: begin
+				result = ~(a | b);
+			end
+            EXE_ALU_SL: begin
+                result = b << a;
+            end
+            EXE_ALU_SR: begin
+                if(sign)
+                    result = b >>> a;//arithmetic
+                else
+                    result = b >> a;//logic
+            end
+            EXE_ALU_LUI: begin
+                result = {b[15:0],16'b0};
+            end
 		endcase
 	end
-	
+
 endmodule

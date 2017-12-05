@@ -74,7 +74,9 @@ module datapath (
      output reg [31:0] fwd_b_data_exe,
 
      output wire a_b_equal,
-     input wire fwd_m
+     input wire fwd_m,
+
+     input wire alu_sign
 	);
 
 	`include "mips_define.vh"
@@ -178,7 +180,7 @@ module datapath (
                 PC_NEXT: inst_addr<=inst_addr_next;
                 PC_FWD_DATA: inst_addr<=fwd_a_data;
                 PC_JUMP: inst_addr<={inst_addr_id[31:28],inst_data_id[25:0], 2'b0};
-                PC_BRANCH: inst_addr<=inst_addr_next_id+(data_imm<<2);	
+                PC_BRANCH: inst_addr<=inst_addr_next_id+(data_imm<<2);
             endcase
 			// if (is_branch_mem)//TODO pc select
 			// 	inst_addr <= branch_target_mem;
@@ -305,9 +307,9 @@ module datapath (
 
 		// exe state
 		case (exe_a_src_exe)
-			EXE_A_FWD_DATA: opa_exe = fwd_a_data_exe;	
+			EXE_A_FWD_DATA: opa_exe = fwd_a_data_exe;
 			EXE_A_LINK: opa_exe = inst_addr_next_exe;	// JAL
-			EXE_A_LUI: opa_exe = {data_imm_exe[31:16], 16'b0};
+			EXE_A_SHIFT: opa_exe = {27'b0,inst_data_exe[10:6]};
 		endcase
 		case (exe_b_src_exe)
 			EXE_B_FWD_DATA: opb_exe = fwd_b_data_exe;
@@ -321,7 +323,8 @@ module datapath (
 		.a(opa_exe),
 		.b(opb_exe),
 		.oper(exe_alu_oper_exe),
-		.result(alu_out_exe)
+		.result(alu_out_exe),
+        .sign(alu_sign)
 		);
 
 	// MEM stage
@@ -379,7 +382,7 @@ module datapath (
 	assign
 		mem_ren = mem_ren_mem,
 		mem_wen = mem_wen_mem,
-		mem_addr = alu_out_mem,	
+		mem_addr = alu_out_mem,
 		mem_dout = fwd_m_mem ? regw_data_wb : data_rt_mem;
 
 	// WB stage
