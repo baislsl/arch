@@ -76,7 +76,19 @@ module datapath (
      output wire a_b_equal,
      input wire fwd_m,
 
-     input wire alu_sign
+     input wire alu_sign,
+
+	 // interrupt
+	output reg [1:0] oper,
+	output reg [4:0] addr_r,
+	input wire [31:0] data_r,
+	output reg [4:0] addr_w,
+	output reg [31:0] data_w,
+	output reg ir_en,
+	output reg ir_in,
+	output reg [31:0] ret_addr,
+	input wire jump_en, // epc_ctrl
+	input wire [31:0] jump_addr //epc
 	);
 
 	`include "mips_define.vh"

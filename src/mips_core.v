@@ -64,6 +64,17 @@ module mips_core (
 
    wire alu_sign;
 
+   wire [1:0] oper;
+   wire [4:0] addr_r;
+   wire [31:0] data_r;
+   wire [4:0] addr_w;
+   wire [31:0]	data_w;
+   wire ir_en;
+   wire ir_in;
+   wire [31:0] ret_addr;
+   wire jump_en;
+   wire [31:0] jump_addr;
+
 	// controller
 	controller CONTROLLER (
 		.clk(clk),
@@ -112,7 +123,11 @@ module mips_core (
         .wb_wen_mem(wb_wen_mem),
         .a_b_equal(a_b_equal),
         .fwd_m(fwd_m),
-        .sign(alu_sign)
+        .sign(alu_sign),
+
+		// interrupt
+		.oper(oper),
+		.jump_en(jump_en)
 	);
 
 	// data path
@@ -169,12 +184,43 @@ module mips_core (
         .wb_wen_mem(wb_wen_mem),
         .a_b_equal(a_b_equal),
         .fwd_m(fwd_m),
-        .alu_sign(alu_sign)
+        .alu_sign(alu_sign),
+
+		// interrupt
+		.oper(oper),
+		.addr_r(addr_r),
+		.data_r(data_r),
+		.addr_w(addr_w),
+		.data_w(data_w),
+		.ir_en(ir_en),
+		.ir_in(interrupter),
+		.ret_addr(ret_addr),
+		.jump_en(jump_en),
+		.jump_addr(jump_addr)
+
+
 	);
 
 
     cp0 CP0 (
-        .ir_in(interrupter)
+		.clk(clk), // main clock
+		`ifdef DEBUG
+		.debug_addr(debug_addr), // debug address
+		.debug_data(debug_data), // debug data
+		`endif
+		// operations (read in ID stage and write in EXE stage)
+		.oper(oper), // CP0 operation type
+		.addr_r(addr_r), // read address
+		.data_r(data_r), // read data
+		.addr_w(addr_w), // write address
+		.data_w(data_w), // write data
+		// exceptions (check exceptions in MEM stage)
+		.rst(rst), // synchronous reset
+		.ir_en(ir_en), // interrupt enable
+		.ir_in(interrupter), // external interrupt input
+		.ret_addr(ret_addr), // target instruction address to store when interrupt occurred
+		.jump_en(jump_en), // force jump enable signal when interrupt authorised or ERET occurred
+		.jump_addr(jump_addr) // target instruction address to jump to
     );
 
 endmodule

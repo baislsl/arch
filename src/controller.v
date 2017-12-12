@@ -62,7 +62,11 @@ module controller (/*AUTOARG*/
     input wire a_b_equal,
     output reg fwd_m,
 
-    output reg sign
+    output reg sign,
+
+	// interrupt
+	output reg [1:0] oper;
+	input wire jump_en; // epc_ctrl
 	);
 
 	`include "mips_define.vh"
