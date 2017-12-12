@@ -174,7 +174,7 @@ module mips_core (
 
 
     cp0 CP0 (
-        .interrupt_signal(interrupter)
+        .ir_in(interrupter)
     );
 
 endmodule
