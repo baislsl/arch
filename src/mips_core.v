@@ -24,7 +24,8 @@ module mips_core (
 	output wire mem_wen,  // memory write enable signal
 	output wire [31:0] mem_addr,  // address of memory
 	output wire [31:0] mem_dout,  // data writing to memory
-	input wire [31:0] mem_din  // data read from memory
+	input wire [31:0] mem_din,  // data read from memory
+    input wire interrupter
 	);
 
 	// control signals
@@ -170,5 +171,10 @@ module mips_core (
         .fwd_m(fwd_m),
         .alu_sign(alu_sign)
 	);
+
+
+    cp0 CP0 (
+        .interrupt_signal(interrupter)
+    );
 
 endmodule

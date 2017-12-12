@@ -16,18 +16,18 @@ module mips (
 	input wire rst,  // synchronous reset
 	input wire interrupter  // interrupt source, for future use
 	);
-	
+
 	// instruction signals
 	wire inst_ren;
 	wire [31:0] inst_addr;
 	wire [31:0] inst_data;
-	
+
 	// memory signals
 	wire mem_ren, mem_wen;
 	wire [31:0] mem_addr;
 	wire [31:0] mem_data_r;
 	wire [31:0] mem_data_w;
-	
+
 	// mips core
 	mips_core MIPS_CORE (
 		.clk(clk),
@@ -45,16 +45,17 @@ module mips (
 		.mem_wen(mem_wen),
 		.mem_addr(mem_addr),
 		.mem_dout(mem_data_w),
-		.mem_din(mem_data_r)
+		.mem_din(mem_data_r),
+        .interrupter(interrupter)
 		);
-	
+
 	inst_rom INST_ROM (
 		.clk(clk),
 		.addr({2'b0, inst_addr[31:2]}),
 		//.addr(inst_addr),
 		.dout(inst_data)
 		);
-	
+
 	data_ram DATA_RAM (
 		.clk(clk),
 		.we(mem_wen),
@@ -63,5 +64,5 @@ module mips (
 		.din(mem_data_w),
 		.dout(mem_data_r)
 		);
-	
+
 endmodule
