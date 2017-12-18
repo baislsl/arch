@@ -75,6 +75,7 @@ module cp0 (
         end
         if (ir) begin //external interrupt
             jump_addr <= regs[CP0_EHBR];
+            regs[CP0_EPCR] <= ret_addr;
             jump_en <= 1;
         end
     end
