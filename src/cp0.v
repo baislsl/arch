@@ -72,11 +72,13 @@ module cp0 (
         if (oper == EXE_CP0_ERET) begin //eret
             jump_addr <= regs[CP0_EPCR];
             jump_en <= 1;
-        end
-        if (ir) begin //external interrupt
+        end else if (ir) begin //external interrupt
             jump_addr <= regs[CP0_EHBR];
             regs[CP0_EPCR] <= ret_addr;
             jump_en <= 1;
+        end else begin
+            jump_en <= 0;
+            jump_addr <= 32'b0;
         end
     end
 
