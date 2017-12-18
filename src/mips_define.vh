@@ -13,11 +13,13 @@ localparam
     EXE_A_FWD_DATA = 0,
 	EXE_A_LINK   = 1,
 	EXE_A_SHIFT = 2;
+	EXE_A_INT = 3;
 // EXE B sources
 localparam
-    EXE_B_FWD_DATA = 2,
+	EXE_B_IMM = 0,
     EXE_B_FOUR = 1,
-	EXE_B_IMM    = 0;
+	EXE_B_FWD_DATA = 2,
+	EXE_B_INT = 3;
 
 // EXE ALU operations
 localparam
@@ -102,7 +104,7 @@ localparam  // bit 31:26 for instruction type
 	INST_ORI        = 6'b001101,
 	INST_XORI       = 6'b001110,
 	INST_LUI        = 6'b001111,
-	//INST_CP0        = 6'b010000,  // bit 24:21 for function type when bit 25 is not set, bit 5:0 for co type when bit 25 is set
+	INST_CP0        = 6'b010000,  // bit 24:21 for function type when bit 25 is not set, bit 5:0 for co type when bit 25 is set
 	//CP_FUNC_MF     = 4'b0000,
 	//CP_FUNC_MT     = 4'b0100,
 	//CP0_CO_ERET     = 6'b011000,

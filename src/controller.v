@@ -66,7 +66,7 @@ module controller (/*AUTOARG*/
 
 	// interrupt
 	output reg [1:0] oper;
-	input wire jump_en; // epc_ctrl
+ 	input wire jump_en; // epc_ctrl, TODO: what to do with jump_en
 	);
 
 	`include "mips_define.vh"
@@ -98,6 +98,7 @@ module controller (/*AUTOARG*/
         is_store = 0;
         sign = 0;
 		unrecognized = 0;
+		oper = EXE_CP_NONE;
 		case (inst[31:26])
 			INST_R: begin
 				case (inst[5:0])
@@ -371,6 +372,27 @@ module controller (/*AUTOARG*/
                 wb_wen = 1;
                 wb_addr_src =  WB_ADDR_RT;
                 wb_data_src = WB_DATA_ALU;
+			end
+			INST_CP0: begin
+				if(inst[25]) begin 
+					if(inst[5:0] == 6'b011000) begin	// ERET
+						oper = EXE_CP0_ERET;
+					end
+				end else begin
+					case(inst[24:21]) 
+						5'b00100: begin //MTC0
+							oper = EXE_CP_STORE;
+						end
+						5'b00000: begin	// MFC0
+							exe_a_src = EXE_A_INT;
+							exe_b_src = EXE_B_INT;
+							exe_alu_oper = EXE_ALU_ADD;
+							wb_addr_src = WB_ADDR_RT;
+							wb_data_src = WB_DATA_ALU;
+							wb_wen = 1;
+						end
+					endcase
+				end
 			end
 			default: begin
 				unrecognized = 1;

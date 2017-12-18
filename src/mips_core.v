@@ -187,13 +187,11 @@ module mips_core (
         .alu_sign(alu_sign),
 
 		// interrupt
-		.oper(oper),
 		.addr_r(addr_r),
 		.data_r(data_r),
 		.addr_w(addr_w),
 		.data_w(data_w),
 		.ir_en(ir_en),
-		.ir_in(interrupter),
 		.ret_addr(ret_addr),
 		.jump_en(jump_en),
 		.jump_addr(jump_addr)

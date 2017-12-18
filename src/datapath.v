@@ -79,13 +79,11 @@ module datapath (
      input wire alu_sign,
 
 	 // interrupt
-	output reg [1:0] oper,
 	output reg [4:0] addr_r,
 	input wire [31:0] data_r,
 	output reg [4:0] addr_w,
 	output reg [31:0] data_w,
 	output reg ir_en,
-	output reg ir_in,
 	output reg [31:0] ret_addr,
 	input wire jump_en, // epc_ctrl
 	input wire [31:0] jump_addr //epc
@@ -119,6 +117,7 @@ module datapath (
 	wire [31:0] alu_out_exe;
     reg fwd_m_exe;
 	reg alu_sign_exe;
+	reg [31:0] cp0_data_r_exe;
 
 	// MEM signals
 	reg [31:0] inst_addr_mem;
@@ -189,12 +188,16 @@ module datapath (
 			inst_addr <= 0;
 		end
 		else if (if_en) begin
-            case (pc_src_ctrl)
-                PC_NEXT: inst_addr<=inst_addr_next;
-                PC_FWD_DATA: inst_addr<=fwd_a_data;
-                PC_JUMP: inst_addr<={inst_addr_id[31:28],inst_data_id[25:0], 2'b0};
-                PC_BRANCH: inst_addr<=inst_addr_next_id+(data_imm<<2);
-            endcase
+			if(jump_en) begin	// TODO： 不清楚默认为1还是0，只是按PPT图写
+				case (pc_src_ctrl)
+					PC_NEXT: inst_addr<=inst_addr_next;
+					PC_FWD_DATA: inst_addr<=fwd_a_data;
+					PC_JUMP: inst_addr<={inst_addr_id[31:28],inst_data_id[25:0], 2'b0};
+					PC_BRANCH: inst_addr<=inst_addr_next_id+(data_imm<<2);
+				endcase
+			end else begin 
+				inst_addr <= jump_addr;
+			end 
 			// if (is_branch_mem)//TODO pc select
 			// 	inst_addr <= branch_target_mem;
 			// else
@@ -275,6 +278,7 @@ module datapath (
             fwd_a_data_exe<=0;
             fwd_b_data_exe<=0;
 			alu_sign_exe<=0;
+			cp0_data_r_exe<=0;
 		end
 		else if (exe_en) begin
 			exe_valid <= id_valid;
@@ -298,12 +302,23 @@ module datapath (
             fwd_b_data_exe<=fwd_b_data;
             fwd_m_exe<=fwd_m;
 			alu_sign_exe<=alu_sign;
+			cp0_data_r_exe<=data_r;
 		end
 	end
 
 	assign
 		a_b_equal = (fwd_a_data == fwd_b_data);
 
+	assign
+		// MTC0
+		data_w = fwd_b_data,
+		addr_w = {1'b0, inst_addr_id[15:11], inst_addr_id[2:0]},
+
+		// MFC0
+		addr_r = {1'b0, inst_addr_id[15:11], inst_addr_id[2:0]},
+
+		ir_en = 1,
+		ret_addr = pc_src_ctrl ? inst_addr_id : inst_addr;
 
 	always @(*) begin
 		// id state
@@ -325,12 +340,13 @@ module datapath (
 			EXE_A_FWD_DATA: opa_exe = fwd_a_data_exe;
 			EXE_A_LINK: opa_exe = inst_addr_next_exe;	// JAL
 			EXE_A_SHIFT: opa_exe = {27'b0,inst_data_exe[10:6]};
+			EXE_A_INT: opa_exe = cp0_data_r_exe;
 		endcase
 		case (exe_b_src_exe)
 			EXE_B_FWD_DATA: opb_exe = fwd_b_data_exe;
             EXE_B_FOUR: opb_exe = 4;
 			EXE_B_IMM: opb_exe = data_imm_exe;
-			// EXE_B_BRANCH: opb_exe = {data_imm_exe[29:0], 2'b0};
+			EXE_B_INT: opb_exe = 0;
 		endcase
 	end
 
