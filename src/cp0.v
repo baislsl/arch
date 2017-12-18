@@ -21,6 +21,8 @@ module cp0 (
     output reg [31:0] jump_addr // target instruction address to jump to
     )
 
+    reg [31:0] regs[8:0];
+
     // interrupt determination
     wire ir;
     reg ir_wait = 0, ir_valid = 1;
@@ -45,19 +47,36 @@ module cp0 (
 
     assign ir = ir_en & ir_wait & ir_valid;
 
-    // Exception Handler Base Register
+    // // Exception Handler Base Register
+    // always @(posedge clk) begin
+    //
+    // end
+    //
+    // // Exception Program Counter Register
+    // always @(posedge clk) begin
+    //     //……
+    // end
+
     always @(posedge clk) begin
-        //……
+        data_r <= regs[addr_r];
     end
 
-    // Exception Program Counter Register
     always @(posedge clk) begin
-        //……
+        if (oper == EXE_CP_STORE) begin
+            regs[addr_w] <= data_w;
+        end
     end
 
     // jump determination
     always @(*) begin
-        // ……
+        if (oper == EXE_CP0_ERET) begin //eret
+            jump_addr <= regs[CP0_EPCR];
+            jump_en <= 1;
+        end
+        if (ir) begin //external interrupt
+            jump_addr <= regs[CP0_EHBR];
+            jump_en <= 1;
+        end
     end
 
 endmodule
