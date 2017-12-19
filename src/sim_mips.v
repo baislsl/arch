@@ -38,8 +38,8 @@ module sim_mips;
 		#100 rst = 0;
 		
 		# 470;
-		#40; interrupter = 1;
-		#40; interrupter = 0;
+		#400; interrupter = 1;
+		#400; interrupter = 0;
 		
 		#200;
 
@@ -48,6 +48,8 @@ module sim_mips;
 		#40 interrupter = 0;
 		
 		#220;
+		
+		rst = 1;
 		
 				
 		#40 interrupter = 1;

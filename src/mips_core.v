@@ -25,7 +25,12 @@ module mips_core (
 	output wire [31:0] mem_addr,  // address of memory
 	output wire [31:0] mem_dout,  // data writing to memory
 	input wire [31:0] mem_din,  // data read from memory
-    input wire interrupter
+    input wire interrupter,
+	output wire ir,
+	    output wire ir_en,
+    output wire ir_valid,
+    output wire ir_wait,
+	output wire jump_en
 	);
 
 	// control signals
@@ -69,10 +74,9 @@ module mips_core (
    wire [31:0] data_r;
    wire [4:0] addr_w;
    wire [31:0]	data_w;
-   wire ir_en;
+   // wire ir_en;
    wire ir_in;
    wire [31:0] ret_addr;
-   wire jump_en;
    wire [31:0] jump_addr;
 
 	// controller
@@ -212,6 +216,9 @@ module mips_core (
 		.rst(rst), // synchronous reset
 		.ir_en(ir_en), // interrupt enable
 		.ir_in(interrupter), // external interrupt input
+		.ir(ir),
+		.ir_valid(ir_valid),
+		.ir_wait(ir_wait),
 		.ret_addr(ret_addr), // target instruction address to store when interrupt occurred
 		.jump_en(jump_en), // force jump enable signal when interrupt authorised or ERET occurred
 		.jump_addr(jump_addr) // target instruction address to jump to

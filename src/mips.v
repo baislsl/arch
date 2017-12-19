@@ -14,7 +14,12 @@ module mips (
 	`endif
 	input wire clk,  // main clock
 	input wire rst,  // synchronous reset
-	input wire interrupter  // interrupt source, for future use
+	input wire interrupter,  // interrupt source, for future use
+	output wire ir,
+	    output wire ir_en,
+    output wire ir_valid,
+    output wire ir_wait,
+	output wire jump_en
 	);
 
 	// instruction signals
@@ -46,7 +51,12 @@ module mips (
 		.mem_addr(mem_addr),
 		.mem_dout(mem_data_w),
 		.mem_din(mem_data_r),
-        .interrupter(interrupter)
+        .interrupter(interrupter),
+		.ir(ir),
+		.ir_en(ir_en),
+		.ir_valid(ir_valid),
+		.ir_wait(ir_wait),
+		  .jump_en(jump_en)
 		);
 
 	inst_rom INST_ROM (

@@ -45,6 +45,7 @@ module mips_top (
 	wire btn_reset, btn_step;
 	wire btn_interrupt;
 	wire disp_prev, disp_next;
+	wire  jump_en;
 
 	btn_scan #(
 		.CLK_FREQ(25)
@@ -76,6 +77,7 @@ module mips_top (
 	end
 
 	wire [31:0] disp_data;
+	wire ir, ir_en, ir_valid,ir_wait;
 	
 	display DISPLAY (
 		.clk(clk_disp),
@@ -83,7 +85,7 @@ module mips_top (
 		.en(8'b11111111),
 		.data(0),
 		.dot(8'b00000000),
-		.led(~{btn_step, btn_interrupt, 6'b0, SW}),
+		.led(~{btn_step, btn_interrupt, ir, ir_en, ir_valid, ir_wait, jump_en, 1'b0, SW}),
 		.led_clk(LED_CLK),
 		.led_en(LED_PEN),
 		.led_do(LED_DO),
@@ -103,7 +105,12 @@ module mips_top (
 		`endif
 		.clk(clk_cpu),
 		.rst(rst_all),
-		.interrupter(btn_interrupt)
+		.interrupter(btn_interrupt),
+		.ir(ir),
+				.ir_en(ir_en),
+		.ir_valid(ir_valid),
+		.ir_wait(ir_wait),
+		.jump_en(jump_en)
 		);
 		
 	wire [9:0] vga_h_count;
