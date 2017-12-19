@@ -12,7 +12,7 @@ localparam
 localparam
     EXE_A_FWD_DATA = 0,
 	EXE_A_LINK   = 1,
-	EXE_A_SHIFT = 2;
+	EXE_A_SHIFT = 2,
 	EXE_A_INT = 3;
 // EXE B sources
 localparam

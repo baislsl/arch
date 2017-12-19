@@ -79,12 +79,12 @@ module datapath (
      input wire alu_sign,
 
 	 // interrupt
-	output reg [4:0] addr_r,
+	output wire [4:0] addr_r,
 	input wire [31:0] data_r,
-	output reg [4:0] addr_w,
-	output reg [31:0] data_w,
-	output reg ir_en,
-	output reg [31:0] ret_addr,
+	output wire [4:0] addr_w,
+	output wire [31:0] data_w,
+	output wire ir_en,
+	output wire [31:0] ret_addr,
 	input wire jump_en, // epc_ctrl
 	input wire [31:0] jump_addr //epc
 	);
@@ -188,15 +188,15 @@ module datapath (
 			inst_addr <= 0;
 		end
 		else if (if_en) begin
-			if(jump_en) begin	// TODO： 不清楚默认为1还是0，只是按PPT图写
+			if(jump_en) begin
+				inst_addr <= jump_addr;
+			end else begin 
 				case (pc_src_ctrl)
 					PC_NEXT: inst_addr<=inst_addr_next;
 					PC_FWD_DATA: inst_addr<=fwd_a_data;
 					PC_JUMP: inst_addr<={inst_addr_id[31:28],inst_data_id[25:0], 2'b0};
 					PC_BRANCH: inst_addr<=inst_addr_next_id+(data_imm<<2);
 				endcase
-			end else begin 
-				inst_addr <= jump_addr;
 			end 
 			// if (is_branch_mem)//TODO pc select
 			// 	inst_addr <= branch_target_mem;

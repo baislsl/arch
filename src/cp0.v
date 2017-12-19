@@ -19,9 +19,10 @@ module cp0 (
     input wire [31:0] ret_addr, // target instruction address to store when interrupt occurred
     output reg jump_en, // force jump enable signal when interrupt authorised or ERET occurred
     output reg [31:0] jump_addr // target instruction address to jump to
-    )
+    );
+	`include "mips_define.vh"
 
-    reg [31:0] regs[8:0];
+    reg [31:0] regs[31:0];
 
     // interrupt determination
     wire ir;
@@ -61,18 +62,14 @@ module cp0 (
         data_r <= regs[addr_r];
     end
 
-    always @(posedge clk) begin
-        if (oper == EXE_CP_STORE) begin
-            regs[addr_w] <= data_w;
-        end
-    end
-
     // jump determination
-    always @(*) begin
+    always @(*) begin	// TODO: seems to has bugs
         if (oper == EXE_CP0_ERET) begin //eret
             jump_addr <= regs[CP0_EPCR];
             jump_en <= 1;
-        end else if (ir) begin //external interrupt
+        end else if (oper == EXE_CP_STORE) begin
+		      regs[addr_w] <= data_w;
+		  end else if (ir) begin //external interrupt
             jump_addr <= regs[CP0_EHBR];
             regs[CP0_EPCR] <= ret_addr;
             jump_en <= 1;
