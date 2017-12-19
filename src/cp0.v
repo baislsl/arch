@@ -2,10 +2,6 @@
 
 module cp0 (
     input wire clk, // main clock
-    `ifdef DEBUG
-    input wire [4:0] debug_addr, // debug address
-    output reg [31:0] debug_data, // debug data
-    `endif
     // operations (read in ID stage and write in EXE stage)
     input wire [1:0] oper, // CP0 operation type
     input wire [4:0] addr_r, // read address

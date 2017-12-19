@@ -202,10 +202,6 @@ module mips_core (
 
     cp0 CP0 (
 		.clk(clk), // main clock
-		`ifdef DEBUG
-		.debug_addr(debug_addr), // debug address
-		.debug_data(debug_data), // debug data
-		`endif
 		// operations (read in ID stage and write in EXE stage)
 		.oper(oper), // CP0 operation type
 		.addr_r(addr_r), // read address
