@@ -21,9 +21,9 @@ module cp0 (
     reg [31:0] regs[31:0];
 
     // interrupt determination
-    wire ir;
+    wire ir, eret;
     reg ir_wait = 0, ir_valid = 1;
-    reg eret = 0;
+    assign eret = (oper == EXE_CP0_ERET);
     always @(posedge clk) begin
         if (rst)
             ir_wait <= 0;
@@ -64,7 +64,7 @@ module cp0 (
             jump_addr <= regs[CP0_EPCR];
             jump_en <= 1;
         end else if (oper == EXE_CP_STORE) begin
-		      regs[addr_w] <= data_w;
+		    regs[addr_w] <= data_w;
 		  end else if (ir) begin //external interrupt
             jump_addr <= regs[CP0_EHBR];
             regs[CP0_EPCR] <= ret_addr;

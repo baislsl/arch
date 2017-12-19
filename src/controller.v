@@ -507,6 +507,8 @@ module controller (/*AUTOARG*/
 			if_en = 0;
 			id_en = 0;
 			exe_rst = 1;
+		end else if(jump_en) begin
+			id_rst = 1;
 		end
 	end
 

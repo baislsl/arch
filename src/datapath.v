@@ -312,10 +312,10 @@ module datapath (
 	assign
 		// MTC0
 		data_w = fwd_b_data,
-		addr_w = inst_addr_id[15:11],
+		addr_w = inst_data_id[15:11],
 
 		// MFC0
-		addr_r = inst_addr_id[15:11],
+		addr_r = inst_data_id[15:11],
 
 		ir_en = 1,
 		ret_addr = pc_src_ctrl ? inst_addr_id : inst_addr;
