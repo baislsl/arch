@@ -26,21 +26,26 @@ module cp0 (
     // interrupt determination
     wire eret;
 
+    reg ir_in_previous = 0;
+
     assign eret = (oper == EXE_CP0_ERET);
     always @(posedge clk) begin
         if (rst)
             ir_valid = 1;
-        else if (eret)
-            ir_valid = 1;
-        else if (ir)
-            ir_valid = 0; // prevent exception reenter
+            ir_wait = 0;
+            ir_in_previous = 0;
+        else begin
+            if (eret)
+                ir_valid = 1;
+            else if (ir)
+                ir_valid = 0; // prevent exception reenter
+            if (ir_in && !ir_in_previous)
+                ir_wait = 1;
+            else if (eret)
+                ir_wait = 0;
+            ir_in_previous = ir_in;
+        end
 
-        if (rst)
-            ir_wait = 0;
-        else if (ir_in)
-            ir_wait = 1;
-        else if (eret)
-            ir_wait = 0;
     end
 
     assign ir = ir_en & ir_wait & ir_valid;
