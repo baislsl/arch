@@ -5,7 +5,7 @@ module cp0 (
     // operations (read in ID stage and write in EXE stage)
     input wire [1:0] oper, // CP0 operation type
     input wire [4:0] addr_r, // read address
-    output reg [31:0] data_r, // read data
+    output wire [31:0] data_r, // read data
     input wire [4:0] addr_w, // write address
     input wire [31:0] data_w, // write data
     // exceptions (check exceptions in MEM stage)
@@ -57,10 +57,10 @@ module cp0 (
     // always @(posedge clk) begin
     //     //……
     // end
-
-    always @(posedge clk) begin
-        data_r = regs[addr_r];
-    end
+    assign data_r = regs[addr_r];
+    // always @(posedge clk) begin
+    //     data_r = regs[addr_r];
+    // end
 
     // jump determination
     always @(posedge clk) begin	// TODO: seems to has bugs
