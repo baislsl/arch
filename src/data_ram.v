@@ -1,4 +1,8 @@
 module data_ram (
+	output reg ram_stall,
+	input wire rst,
+	input wire cs,	
+
 	input wire clk,
 	input wire we,
 	input wire [31:0] addr,

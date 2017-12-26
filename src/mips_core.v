@@ -30,7 +30,10 @@ module mips_core (
 	    output wire ir_en,
     output wire ir_valid,
     output wire ir_wait,
-	output wire jump_en
+	output wire jump_en,
+	input wire ram_stall,
+	input wire rom_stall,
+	output wire cs
 	);
 
 	// control signals
@@ -131,7 +134,12 @@ module mips_core (
 
 		// interrupt
 		.oper(oper),
-		.jump_en(jump_en)
+		.jump_en(jump_en),
+
+		// stall
+		.ram_stall(ram_stall),
+		.rom_stall(rom_stall),
+		.cs(cs)
 	);
 
 	// data path

@@ -66,7 +66,12 @@ module controller (/*AUTOARG*/
 
 	// interrupt
 	output reg [1:0] oper,
- 	input wire jump_en // epc_ctrl, TODO: what to do with jump_en
+ 	input wire jump_en, // epc_ctrl, TODO: what to do with jump_en
+
+	// ram rom stall
+	input wire rom_stall,
+	input wire ram_stall,
+	output reg cs
 	);
 
 	`include "mips_define.vh"

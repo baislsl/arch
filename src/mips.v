@@ -33,8 +33,14 @@ module mips (
 	wire [31:0] mem_data_r;
 	wire [31:0] mem_data_w;
 
+	wire rom_stall, ram_stall;
+	wire cs;
+
 	// mips core
 	mips_core MIPS_CORE (
+		.rom_stall(rom_stall),
+		.ram_stall(ram_stall),
+		.cs(cs),
 		.clk(clk),
 		.rst(rst),
 		`ifdef DEBUG
@@ -60,6 +66,9 @@ module mips (
 		);
 
 	inst_rom INST_ROM (
+		.rom_stall(rom_stall),
+		.cs(cs),
+		.rst(rst),
 		.clk(clk),
 		.addr({2'b0, inst_addr[31:2]}),
 		//.addr(inst_addr),
@@ -67,6 +76,9 @@ module mips (
 		);
 
 	data_ram DATA_RAM (
+		.ram_stall(ram_stall),
+		.cs(cs),
+		.rst(rst),
 		.clk(clk),
 		.we(mem_wen),
 		.addr({2'b0, mem_addr[31:2]}),
