@@ -85,6 +85,7 @@ module controller (/*AUTOARG*/
 
     always @ ( posedge clk ) begin
         is_load_exe<=is_load;
+		if(!rom_stall) rom_cs = ~rom_cs;	// TODO: unsure
     end
 
 	always @(*) begin
@@ -105,6 +106,7 @@ module controller (/*AUTOARG*/
         sign = 0;
 		unrecognized = 0;
 		oper = EXE_CP_NONE;
+		ram_cs = 0;
 		case (inst[31:26])
 			INST_R: begin
 				case (inst[5:0])
@@ -351,6 +353,7 @@ module controller (/*AUTOARG*/
                 sign = 0;
 			end
 			INST_LW: begin
+				ram_cs = 1;
 				imm_ext = 1;
 				exe_b_src = EXE_B_IMM;
 				exe_alu_oper = EXE_ALU_ADD;
@@ -362,6 +365,7 @@ module controller (/*AUTOARG*/
                 is_load = 1;
 			end
 			INST_SW: begin
+				ram_cs = 1;
 				imm_ext = 1;
 				exe_b_src = EXE_B_IMM;
 				exe_alu_oper = EXE_ALU_ADD;
@@ -499,6 +503,17 @@ module controller (/*AUTOARG*/
 			wb_en = 0;
 		end
 		`endif
+		else if(rom_stall) begin 
+			if_en = 0;
+			id_en = 0;
+			exe_rst = 1;
+		end else if(ram_stall) begin
+			if_en = 0;
+			id_en = 0;
+			exe_en = 0;
+			mem_en = 0;
+			wb_rst = 1;
+		end
 		// this stall indicate that ID is waiting for previous instruction, should insert NOPs between ID and EXE.
 		// else if (reg_stall) begin
 		// 	if_en = 0;
