@@ -71,7 +71,8 @@ module controller (/*AUTOARG*/
 	// ram rom stall
 	input wire rom_stall,
 	input wire ram_stall,
-	output reg cs
+	output reg rom_cs,
+	output reg ram_cs
 	);
 
 	`include "mips_define.vh"

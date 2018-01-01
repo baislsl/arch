@@ -33,7 +33,8 @@ module mips_core (
 	output wire jump_en,
 	input wire ram_stall,
 	input wire rom_stall,
-	output wire cs
+	output wire rom_cs,
+	output wire ram_cs
 	);
 
 	// control signals
@@ -139,7 +140,7 @@ module mips_core (
 		// stall
 		.ram_stall(ram_stall),
 		.rom_stall(rom_stall),
-		.cs(cs)
+		.ram_cs(rom_cs)
 	);
 
 	// data path
