@@ -34,9 +34,7 @@ module cp0 (
             ir_valid = 1;
             ir_wait = 0;
             ir_in_previous = 0;
-            regs[CP0_TCR] = 0;
         end else begin
-            regs[CP0_TCR] += 1;
             if (eret)
                 ir_valid = 1;
             else if (ir)
@@ -79,6 +77,13 @@ module cp0 (
             jump_en = 0;
             jump_addr = 32'b0;
         end
+		  
+			if(rst) begin 
+				regs[CP0_TCR] = 0;
+			end else begin
+            regs[CP0_TCR] = regs[CP0_TCR] + 1;
+			end
+
     end
 
 endmodule
