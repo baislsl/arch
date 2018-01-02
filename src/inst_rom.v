@@ -27,7 +27,7 @@ module inst_rom (
             ack = 0;
         end else begin
             if (addr_previous==addr) begin
-                counter+=1;
+                counter = counter + 1;
                 if (counter==7) begin
                     out <= data[addr[ADDR_WIDTH-1:0]];
                     ack=1;

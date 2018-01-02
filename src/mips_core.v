@@ -140,7 +140,8 @@ module mips_core (
 		// stall
 		.ram_stall(ram_stall),
 		.rom_stall(rom_stall),
-		.ram_cs(rom_cs)
+		.ram_cs(ram_cs),
+		.rom_cs(rom_cs)
 	);
 
 	// data path

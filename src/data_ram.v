@@ -1,5 +1,5 @@
 module data_ram (
-	output reg ram_stall,
+	output wire ram_stall,
 	input wire rst,
 	input wire cs,
 
@@ -34,7 +34,7 @@ module data_ram (
             ack=0;
         end else begin
             if (addr_previous==addr) begin
-                counter+=1;
+                counter = counter + 1;
                 if (counter==7) begin
                     if (we && addr[31:ADDR_WIDTH]==0)
                         data[addr[ADDR_WIDTH-1:0]] = din;

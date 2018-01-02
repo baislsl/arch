@@ -83,10 +83,17 @@ module controller (/*AUTOARG*/
     reg is_load_exe;
 	reg load_stall;
 
+	initial begin
+		rom_cs = 1;
+	end
+
     always @ ( posedge clk ) begin
         is_load_exe<=is_load;
-		if(!rom_stall) rom_cs = ~rom_cs;	// TODO: unsure
     end
+
+	always @(clk) begin
+		if(!rom_stall) rom_cs = ~rom_cs;	// TODO: unsure
+	end 
 
 	always @(*) begin
 		pc_src = PC_NEXT;
