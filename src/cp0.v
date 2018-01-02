@@ -34,7 +34,9 @@ module cp0 (
             ir_valid = 1;
             ir_wait = 0;
             ir_in_previous = 0;
+            regs[CP0_TCR] = 0;
         end else begin
+            regs[CP0_TCR] += 1;
             if (eret)
                 ir_valid = 1;
             else if (ir)
@@ -63,7 +65,7 @@ module cp0 (
     // end
 
     // jump determination
-    always @(posedge clk) begin	// TODO: seems to has bugs
+    always @(posedge clk) begin
         if (oper == EXE_CP0_ERET) begin //eret
             jump_addr = regs[CP0_EPCR];
             jump_en = 1;
