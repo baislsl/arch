@@ -10,6 +10,8 @@ module cp0 (
     input wire [31:0] data_w, // write data
     // exceptions (check exceptions in MEM stage)
     input wire rst, // synchronous reset
+    input wire if_rst,
+    input wire if_en,
     input wire ir_en, // interrupt enable
     input wire ir_in, // external interrupt input
     input wire [31:0] ret_addr, // target instruction address to store when interrupt occurred
@@ -64,25 +66,36 @@ module cp0 (
 
     // jump determination
     always @(posedge clk) begin
-        if (oper == EXE_CP0_ERET) begin //eret
-            jump_addr = regs[CP0_EPCR];
-            jump_en = 1;
-        end else if (oper == EXE_CP_STORE) begin
-		    regs[addr_w] = data_w;
-		end else if (ir) begin //external interrupt
-            jump_addr = regs[CP0_EHBR];
-            regs[CP0_EPCR] = ret_addr;
-            jump_en = 1;
-        end else begin
+        if (if_rst) begin
+            jump_addr = 0;
             jump_en = 0;
-            jump_addr = 32'b0;
+        end else begin
+            if (oper == EXE_CP0_ERET) begin //eret
+                jump_addr = regs[CP0_EPCR];
+                jump_en = 1;
+            end else if (oper == EXE_CP_STORE) begin
+                regs[addr_w] = data_w;
+            end else if (ir) begin //external interrupt
+                jump_addr = regs[CP0_EHBR];
+                jump_en = 1;
+            end else begin
+                if (if_en) begin
+                    jump_en = 0;
+                    jump_addr = 32'b0;
+                end
+                
+            end
+        end 
+
+        if(ir)                 
+            regs[CP0_EPCR] = ret_addr;
+
+    
+        if(rst) begin 
+            regs[CP0_TCR] = 0;
+        end else begin
+        regs[CP0_TCR] = regs[CP0_TCR] + 1;
         end
-		  
-			if(rst) begin 
-				regs[CP0_TCR] = 0;
-			end else begin
-            regs[CP0_TCR] = regs[CP0_TCR] + 1;
-			end
 
     end
 

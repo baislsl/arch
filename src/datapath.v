@@ -185,7 +185,7 @@ module datapath (
     //next PC
 	always @(posedge clk) begin
 		if (if_rst) begin
-			inst_addr <= 0;
+			inst_addr <= 0;	
 		end
 		else if (if_en) begin
 			if(jump_en) begin

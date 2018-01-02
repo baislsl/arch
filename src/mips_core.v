@@ -224,6 +224,8 @@ module mips_core (
 		.data_w(data_w), // write data
 		// exceptions (check exceptions in MEM stage)
 		.rst(rst), // synchronous reset
+		.if_rst(if_rst),
+		.if_en(if_en),
 		.ir_en(ir_en), // interrupt enable
 		.ir_in(interrupter), // external interrupt input
 		.ir(ir),
