@@ -71,7 +71,7 @@ module controller (/*AUTOARG*/
 	// ram rom stall
 	input wire rom_stall,
 	input wire ram_stall,
-	output reg rom_cs,
+	output wire rom_cs,
 	output reg ram_cs
 	);
 
@@ -83,17 +83,18 @@ module controller (/*AUTOARG*/
     reg is_load_exe;
 	reg load_stall;
 
-	initial begin
-		rom_cs = 1;
-	end
+	// initial begin
+	// 	rom_cs = 1;
+	// end
 
     always @ ( posedge clk ) begin
         is_load_exe<=is_load;
     end
 
-	always @(clk) begin
-		if(!rom_stall) rom_cs = ~rom_cs;	// TODO: unsure
-	end 
+	assign rom_cs = 1;
+	// always @(clk) begin
+	// 	if(!rom_stall) rom_cs = ~rom_cs;	// TODO: unsure
+	// end 
 
 	always @(*) begin
 		pc_src = PC_NEXT;
