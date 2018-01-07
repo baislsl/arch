@@ -76,6 +76,10 @@ module mips (
 		//.addr(inst_addr),
 		.dout(inst_data)
 		);
+	
+	cmu CMU (
+		
+	);
 
 	data_ram DATA_RAM (
 		.ram_stall(ram_stall),
