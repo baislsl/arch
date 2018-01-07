@@ -27,7 +27,7 @@ module cache (
     reg [TAG_BITS-1:0] inner_tag [0:LINE_NUM-1];
     reg [WORD_BITS-1:0] inner_data [0:LINE_NUM*LINE_WORDS_WIDTH-1];
 
-    assign hit = valid && ~dirty;
+    assign hit = (addr[ADDR_BITS-1:ADDR_BITS-TAG_BITS]==inner_tag[addr[ADDR_BITS-TAG_BITS-1:LINE_WORDS_WIDTH+WORD_BYTES_WIDTH]]) && valid;
 
     always @(posedge clk) begin
         

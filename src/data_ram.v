@@ -7,7 +7,8 @@ module data_ram (
 	input wire we,
 	input wire [31:0] addr,
 	input wire [31:0] din,
-	output reg [31:0] dout
+	output reg [31:0] dout,
+	output reg ack
 	);
 
 	parameter
@@ -16,7 +17,6 @@ module data_ram (
 	reg [31:0] data [0:(1<<ADDR_WIDTH)-1];
     reg [3:0]counter;
     reg [31:0] addr_previous;
-    reg ack;
 
 	initial	begin
 		$readmemh("data_mem.hex", data);
