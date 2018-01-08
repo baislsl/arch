@@ -78,19 +78,27 @@ module mips (
 		);
 	
 	cmu CMU (
-		
-	);
-
-	data_ram DATA_RAM (
-		.ram_stall(ram_stall),
+		.stall(ram_stall),
 		.cs(ram_cs),
 		.rst(rst),
 		.clk(clk),
 		.we(mem_wen),
-		.addr({2'b0, mem_addr[31:2]}),
+		.addr({2'b0, mem_addr[31:2]}), //TODO or just use mem_addr?
 		//.addr(mem_addr),
 		.din(mem_data_w),
 		.dout(mem_data_r)
-		);
+	);
+
+	// data_ram DATA_RAM (
+	// 	.ram_stall(ram_stall),
+	// 	.cs(ram_cs),
+	// 	.rst(rst),
+	// 	.clk(clk),
+	// 	.we(mem_wen),
+	// 	.addr({2'b0, mem_addr[31:2]}),
+	// 	//.addr(mem_addr),
+	// 	.din(mem_data_w),
+	// 	.dout(mem_data_r)
+	// 	);
 
 endmodule
