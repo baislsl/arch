@@ -78,24 +78,25 @@ always @(posedge clk) begin
 		.we(mem_we),
 		.din(mem_din),
 		.dout(mem_dout),
-		.stall(),
+		.ram_stall(),
 		.ack(mem_ack)
 		);
 	cmu CMU (
-		.clk(clk),
-		.rst(rst),
-		.addr_rw(addr),
-		.en_r(~write),
-		.data_r(),
-		.en_w(write),
-		.data_w({16'h5678, clk_count, inst_count}),
 		.stall(stall),
-		.mem_cs_o(mem_cs),
-		.mem_we_o(mem_we),
-		.mem_addr_o(mem_addr),
-		.mem_data_i(mem_dout),
-		.mem_data_o(mem_din),
-		.mem_ack_i(mem_ack)
+		.rst(rst),
+		.clk(clk),
+		.we(write),
+		.addr(addr),
+		.dout(),
+		.din({16'h5678, clk_count, inst_count}),
+		.ram_stall(), // TODO:
+		.ram_rst(),
+		.ram_cs(mem_cs),
+		.ram_we(mem_we),
+		.ram_addr(mem_addr),
+		.ram_dout(mem_dout),
+		.ram_din(mem_din),
+		.ram_ack(mem_ack)
 	);
 
 endmodule

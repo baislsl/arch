@@ -1,13 +1,24 @@
 module cmu (
-	output reg stall,
+	output reg stall,	// ?? TODO:
 	input wire rst,
 	input wire cs,
 	input wire clk,
 	input wire we,
 	input wire [31:0] addr,
 	input wire [31:0] din,
-	output reg [31:0] dout
+	output reg [31:0] dout,
+	// ram
+	input wire ram_stall,	// ?? TODO:
+	output wire ram_rst,
+	output reg ram_cs,
+	output reg ram_we,
+	output reg [31:0]ram_addr,
+	output reg [31:0]ram_din,
+	input wire [31:0]ram_dout,
+	input wire ram_ack 
     );
+
+	assign ram_rst = rst;
 
 	parameter
 		S_IDLE = 0,
@@ -42,27 +53,6 @@ module cmu (
 		.tag(cache_tag)
 	);
 
-	wire ram_stall;
-	reg ram_rst;
-	reg ram_cs;
-	reg ram_we;
-	reg [31:0] ram_addr;
-	reg [31:0] ram_din;
-	wire [31:0] ram_dout;
-	wire ram_ack;
-
-	data_ram RAM (
-		.ram_stall(ram_stall),
-		.rst(ram_rst),
-		.cs(ram_cs),
-		.clk(clk),
-		.we(ram_we),
-		.addr(ram_addr),
-		.din(ram_din),
-		.dout(ram_dout),
-		.ack(ram_ack)
-	);
-
 	reg [2:0] state;
 	reg [2:0] next_state;
 	
@@ -85,7 +75,6 @@ module cmu (
 			cache_store = 0;
 			cache_edit = 0;
 			cache_invalid = 0;
-			ram_rst = 1;
 			ram_cs = 0;
 			ram_we = 0;
 			ram_addr = 32'b0;
@@ -95,7 +84,6 @@ module cmu (
 			cache_store = 0;
 			cache_edit = 0;
 			cache_invalid = 0;
-			ram_rst = 0;
 			ram_cs = 0;
 			ram_we = 0;
 			cache_addr = din;

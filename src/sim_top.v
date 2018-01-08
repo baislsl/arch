@@ -48,7 +48,7 @@ module sim_top;
 		rst = 1;
 
 		// Wait 100 ns for global reset to finish
-		#95;
+		#95 rst = 0;
         
 		// Add stimulus here
 
