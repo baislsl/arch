@@ -7,10 +7,10 @@ module cache (
     input wire invalid, // reset valid to 0
     input wire [WORD_BITS-1:0] din, // data write in
     output wire hit, // hit or not
-    output reg [WORD_BITS-1:0] dout, // data read out
-    output reg valid, // valid bit
-    output reg dirty, // dirty bit
-    output reg [TAG_BITS-1:0] tag // tag bits
+    output wire [WORD_BITS-1:0] dout, // data read out
+    output wire valid, // valid bit
+    output wire dirty, // dirty bit
+    output wire [TAG_BITS-1:0] tag // tag bits
 );
 
 	parameter
@@ -34,15 +34,16 @@ module cache (
 
     assign hit = (addr[ADDR_BITS-1:ADDR_BITS-TAG_BITS]==inner_tag[addr[ADDR_BITS-TAG_BITS-1:LINE_WORDS_WIDTH+WORD_BYTES_WIDTH]]) && valid;
 
+    assign dout = inner_data[addr[ADDR_BITS-TAG_BITS-1:WORD_BYTES_WIDTH]];
+    assign valid = inner_valid[addr[ADDR_BITS-TAG_BITS-1:LINE_WORDS_WIDTH+WORD_BYTES_WIDTH]];
+    assign dirty = inner_dirty[addr[ADDR_BITS-TAG_BITS-1:LINE_WORDS_WIDTH+WORD_BYTES_WIDTH]];
+    assign tag = inner_tag[addr[ADDR_BITS-TAG_BITS-1:LINE_WORDS_WIDTH+WORD_BYTES_WIDTH]];
+
     always @(posedge clk) begin
         
         if (rst) begin
-            inner_valid = 0;
+            inner_valid <= 0;
         end else begin
-            dout <= inner_data[addr[ADDR_BITS-TAG_BITS-1:WORD_BYTES_WIDTH]];
-            valid <= inner_valid[addr[ADDR_BITS-TAG_BITS-1:LINE_WORDS_WIDTH+WORD_BYTES_WIDTH]];
-            dirty <= inner_dirty[addr[ADDR_BITS-TAG_BITS-1:LINE_WORDS_WIDTH+WORD_BYTES_WIDTH]];
-            tag <= inner_tag[addr[ADDR_BITS-TAG_BITS-1:LINE_WORDS_WIDTH+WORD_BYTES_WIDTH]];
             if (store || edit) begin
                 inner_data[addr[ADDR_BITS-TAG_BITS-1:WORD_BYTES_WIDTH]] <= din;
             end
