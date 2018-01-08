@@ -162,7 +162,7 @@ module cmu (
 				end
 				S_FILL_WAIT: begin
 					next_word_count = 0;
-					next_state <= S_IDLE;
+					next_state = S_IDLE;
 					stall = 0;
 				end
 			endcase
