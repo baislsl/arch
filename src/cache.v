@@ -22,10 +22,15 @@ module cache (
         LINE_NUM = 64,
         LINE_INDEX_WIDTH = 6;
     
-    reg [LINE_NUM-1:0] inner_valid = 0;
-    reg [LINE_NUM-1:0] inner_dirty = 0;
+    reg [LINE_NUM-1:0] inner_valid;
+    reg [LINE_NUM-1:0] inner_dirty;
     reg [TAG_BITS-1:0] inner_tag [0:LINE_NUM-1];
     reg [WORD_BITS-1:0] inner_data [0:LINE_NUM*LINE_WORDS_WIDTH-1];
+	 
+	 initial begin
+		inner_valid = 0;
+		inner_dirty = 0;
+	 end
 
     assign hit = (addr[ADDR_BITS-1:ADDR_BITS-TAG_BITS]==inner_tag[addr[ADDR_BITS-TAG_BITS-1:LINE_WORDS_WIDTH+WORD_BYTES_WIDTH]]) && valid;
 
@@ -36,7 +41,7 @@ module cache (
         end else begin
             dout <= inner_data[addr[ADDR_BITS-TAG_BITS-1:WORD_BYTES_WIDTH]];
             valid <= inner_valid[addr[ADDR_BITS-TAG_BITS-1:LINE_WORDS_WIDTH+WORD_BYTES_WIDTH]];
-            dirty <= inner_dirty[addr[ADDR_BITS-TAG_BITS-1:LINE_WORDS_WIDTH+WORD_BYTES_WIDTH]]
+            dirty <= inner_dirty[addr[ADDR_BITS-TAG_BITS-1:LINE_WORDS_WIDTH+WORD_BYTES_WIDTH]];
             tag <= inner_tag[addr[ADDR_BITS-TAG_BITS-1:LINE_WORDS_WIDTH+WORD_BYTES_WIDTH]];
             if (store || edit) begin
                 inner_data[addr[ADDR_BITS-TAG_BITS-1:WORD_BYTES_WIDTH]] <= din;

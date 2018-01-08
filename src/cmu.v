@@ -63,12 +63,18 @@ module cmu (
 		.ack(ram_ack)
 	);
 
-	reg [2:0] state = S_IDLE;
-	reg [2:0] next_state = S_IDLE;
+	reg [2:0] state;
+	reg [2:0] next_state;
+	
+	initial begin
+		state = S_IDLE;
+		next_state = S_IDLE;
+	end
 
 	wire en_r, en_w;
 	assign en_r = cs && ~we;
 	assign en_w = cs && we;
+	reg word_count, next_word_count;
 
 	always @(posedge clk) begin
 		if (rst) begin
@@ -128,7 +134,7 @@ module cmu (
 							next_state = S_BACK_WAIT;
 						end else begin
 							next_state = S_BACK;
-							cache_addr += 4'b0100;
+							cache_addr = cache_addr + 4'b0100;
 						end
 					end else begin
 						next_word_count = word_count;
@@ -139,7 +145,7 @@ module cmu (
 					next_state = S_FILL;
 				end
 				S_FILL: begin
-					if (ram_ack)
+					if (ram_ack) begin
 						next_word_count = word_count + 1'h1;
 						cache_addr = ram_addr;
 						cache_din = ram_dout;
@@ -150,8 +156,8 @@ module cmu (
 							next_state = S_FILL_WAIT;
 						else
 							next_state = S_FILL;
-							ram_addr += 4'b0100;
-					else
+							ram_addr = ram_addr + 4'b0100;
+					end else
 						next_word_count = word_count;
 				end
 				S_FILL_WAIT: begin
