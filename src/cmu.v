@@ -1,5 +1,5 @@
 module cmu (
-	output reg stall,	// ?? TODO:
+	output wire stall,	// ?? TODO:
 	input wire rst,
 	// input wire cs,
 	input wire clk,
@@ -16,7 +16,7 @@ module cmu (
 	output reg [31:0]ram_din,
 	input wire [31:0]ram_dout,
 	input wire ram_ack 
-    );
+   );
 
 	assign ram_rst = rst;
 
@@ -41,7 +41,7 @@ module cmu (
 	cache CACHE (
 		.clk(clk),
 		.rst(rst),
-		.addr(addr),
+		.addr(cache_addr),
 		.store(cache_store),
 		.edit(cache_edit),
 		.invalid(cache_invalid),
@@ -67,30 +67,14 @@ module cmu (
 	reg[1:0] word_count, next_word_count;
 
 	always @(posedge clk) begin
-		if (rst) begin
+		if(rst) begin
 			state = S_IDLE;
+			next_state = S_IDLE;
 			word_count = 0;
 			next_word_count = 0;
-			cache_din = 32'b0;
-			cache_addr = 32'b0;
-			cache_store = 0;
-			cache_edit = 0;
-			cache_invalid = 0;
-			ram_cs = 0;
-			ram_we = 0;
-			ram_addr = 32'b0;
-			ram_din = 32'b0;
-			stall = 0;
 		end else begin
-			cache_store = 0;
-			cache_edit = 0;
-			cache_invalid = 0;
-			ram_cs = 0;
-			ram_we = 0;
-			cache_addr = din;
 			state = next_state;
 			word_count = next_word_count;
-			stall = 1;
 			case (state)
 				S_IDLE: begin
 					next_word_count = 0;	 // TODO: unsure
@@ -100,7 +84,7 @@ module cmu (
 						end else if (cache_valid && cache_dirty) begin
 							next_state = S_BACK;
 						end else begin
-							next_state = S_FILL;
+							next_state = S_FILL; 
 						end
 					end
 				end
@@ -136,6 +120,27 @@ module cmu (
 					next_state = S_IDLE;
 				end
 			endcase
+		end
+		if (rst) begin
+			cache_din = 32'b0;
+			cache_addr = 32'b0;
+			cache_store = 0;
+			cache_edit = 0;
+			cache_invalid = 0;
+			ram_cs = 0;
+			ram_we = 0;
+			ram_addr = 32'b0;
+			ram_din = 32'b0;
+			// stall = 0;
+		end else begin
+			cache_store = 0;
+			cache_edit = 0;
+			cache_invalid = 0;
+			ram_cs = 0;
+			ram_we = 0;
+			cache_addr = addr;
+			// stall = 1;
+
 			case (next_state)
 				S_IDLE: begin
 					if (en_r || en_w) begin
@@ -147,12 +152,12 @@ module cmu (
 								cache_din = din;
 								cache_edit = 1;
 							end
-							stall = 0;
+							// stall = 0;
 						end else if (cache_valid && cache_dirty) begin
 							ram_addr = {addr[31:4],4'b0};
-							stall = 1;
+							// stall = 1;
 						end else begin
-							stall = 1;
+							// stall = 1;
 						end
 					end
 				end
@@ -171,21 +176,29 @@ module cmu (
 				end
 				S_FILL: begin
 					if (ram_ack) begin
+						if (en_r && cache_addr==addr) begin
+							dout = cache_dout;
+						end
 						cache_addr = ram_addr;
 						cache_din = ram_dout;
-						cache_store = 1;
 						ram_cs = 1;
 						ram_we = 0;
+						if (en_w && cache_addr==addr) begin
+							cache_edit = 1;
+						end else begin
+							cache_store = 1;
+						end
 						if (word_count != 2'b11) begin
 							ram_addr = ram_addr + 4'b0100;
 						end
 					end
 				end
 				S_FILL_WAIT: begin
-					stall = 0;
+					// stall = 0;
 				end
 			endcase
 		end
 	end
+	assign stall = ~(next_state == S_IDLE && cache_hit);
 
 endmodule

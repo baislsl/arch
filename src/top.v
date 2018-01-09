@@ -12,7 +12,7 @@ module top (
 	// 	clk_count = 0;
 	// 	inst_count = 0;
 	// 	hit_count = 0;
-	
+
 	// end
 		// instruction
 	reg [3:0] index = 0;

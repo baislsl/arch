@@ -8,14 +8,14 @@ module data_ram (
 	input wire [31:0] addr,
 	input wire [31:0] din,
 	output reg [31:0] dout,
-	output reg ack
+	output wire ack
 	);
 
 	parameter
 		ADDR_WIDTH = 5;
 
 	reg [31:0] data [0:(1<<ADDR_WIDTH)-1];
-    reg [3:0]counter;
+    reg [1:0]counter;
     reg [31:0] addr_previous;
 
 	initial	begin
@@ -31,24 +31,22 @@ module data_ram (
 	always @(negedge clk) begin
         if (rst) begin
             counter=0;
-            ack=0;
         end else begin
             if (addr_previous==addr) begin
                 counter = counter + 1;
-                if (counter==8) begin
+                if (counter==3) begin
                     if (we && addr[31:ADDR_WIDTH]==0)
                         data[addr[ADDR_WIDTH-1:0]] = din;
                     out = data[addr[ADDR_WIDTH-1:0]];
-                    ack=1;
                 end
             end else begin
                 counter=0;
-                ack=0;
             end
             addr_previous=addr;
         end
 	end
 
+	assign ack = counter == 3 & addr_previous == addr; 
     assign ram_stall = cs & ~ack;
 
 	always @(*) begin
