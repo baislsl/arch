@@ -97,36 +97,20 @@ module cmu (
 					if (en_r || en_w) begin
 						if (cache_hit) begin
 							next_state = S_IDLE;
-							if (en_r) begin
-								dout = cache_dout;
-							end
-							if (en_w) begin
-								cache_din = din;
-								cache_edit = 1;
-							end
-							stall = 0;
 						end else if (cache_valid && cache_dirty) begin
 							next_state = S_BACK;
-							ram_addr = {addr[31:4],4'b0};
-							stall = 1;
 						end else begin
 							next_state = S_FILL;
-							stall = 1;
 						end
 					end
 				end
 				S_BACK: begin
 					if (ram_ack) begin
 						next_word_count = word_count + 1'h1;
-						ram_addr = cache_addr;
-						ram_din = cache_dout;
-						ram_cs = 1;
-						ram_we = 1;
 						if (word_count == 2'b11) begin
 							next_state = S_BACK_WAIT;
 						end else begin
 							next_state = S_BACK;
-							cache_addr = cache_addr + 4'b0100;
 						end
 					end else begin
 						next_word_count = word_count;
@@ -139,16 +123,10 @@ module cmu (
 				S_FILL: begin
 					if (ram_ack) begin
 						next_word_count = word_count + 1'h1;
-						cache_addr = ram_addr;
-						cache_din = ram_dout;
-						cache_store = 1;
-						ram_cs = 1;
-						ram_we = 0;
 						if (word_count == 2'b11)
 							next_state = S_FILL_WAIT;
 						else begin
 							next_state = S_FILL;
-							ram_addr = ram_addr + 4'b0100;
 						end
 					end else
 						next_word_count = word_count;
@@ -156,6 +134,54 @@ module cmu (
 				S_FILL_WAIT: begin
 					next_word_count = 0;
 					next_state = S_IDLE;
+				end
+			endcase
+			case (next_state)
+				S_IDLE: begin
+					if (en_r || en_w) begin
+						if (cache_hit) begin
+							if (en_r) begin
+								dout = cache_dout;
+							end
+							if (en_w) begin
+								cache_din = din;
+								cache_edit = 1;
+							end
+							stall = 0;
+						end else if (cache_valid && cache_dirty) begin
+							ram_addr = {addr[31:4],4'b0};
+							stall = 1;
+						end else begin
+							stall = 1;
+						end
+					end
+				end
+				S_BACK: begin
+					if (ram_ack) begin
+						ram_addr = cache_addr;
+						ram_din = cache_dout;
+						ram_cs = 1;
+						ram_we = 1;
+						if (word_count != 2'b11) begin
+							cache_addr = cache_addr + 4'b0100;
+						end
+					end
+				end
+				S_BACK_WAIT: begin
+				end
+				S_FILL: begin
+					if (ram_ack) begin
+						cache_addr = ram_addr;
+						cache_din = ram_dout;
+						cache_store = 1;
+						ram_cs = 1;
+						ram_we = 0;
+						if (word_count != 2'b11) begin
+							ram_addr = ram_addr + 4'b0100;
+						end
+					end
+				end
+				S_FILL_WAIT: begin
 					stall = 0;
 				end
 			endcase
