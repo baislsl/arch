@@ -20,7 +20,7 @@ module top (
 	wire write;
 	wire [31:0] addr;
 	wire stall;
-always @(posedge clk) begin
+	always @(posedge clk) begin
 		if (rst)
 			index <= 0;
 		else if (valid && ~stall)
@@ -39,7 +39,7 @@ always @(posedge clk) begin
 	
 	always @(posedge clk) begin
 		if (rst)
-			stall_prev <= 0;
+			stall_prev <= 1;
 		else
 			stall_prev <= stall;
 	end

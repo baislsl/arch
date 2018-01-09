@@ -1,7 +1,7 @@
 module cmu (
 	output reg stall,	// ?? TODO:
 	input wire rst,
-	input wire cs,
+	// input wire cs,
 	input wire clk,
 	input wire we,
 	input wire [31:0] addr,
@@ -62,14 +62,15 @@ module cmu (
 	end
 
 	wire en_r, en_w;
-	assign en_r = cs && ~we;
-	assign en_w = cs && we;
-	reg word_count, next_word_count;
+	assign en_r =  ~we;
+	assign en_w = we;
+	reg[1:0] word_count, next_word_count;
 
 	always @(posedge clk) begin
 		if (rst) begin
 			state = S_IDLE;
 			word_count = 0;
+			next_word_count = 0;
 			cache_din = 32'b0;
 			cache_addr = 32'b0;
 			cache_store = 0;
@@ -89,8 +90,10 @@ module cmu (
 			cache_addr = din;
 			state = next_state;
 			word_count = next_word_count;
+			stall = 1;
 			case (state)
 				S_IDLE: begin
+					next_word_count = 0;	 // TODO: unsure
 					if (en_r || en_w) begin
 						if (cache_hit) begin
 							next_state = S_IDLE;
@@ -101,6 +104,7 @@ module cmu (
 								cache_din = din;
 								cache_edit = 1;
 							end
+							stall = 0;
 						end else if (cache_valid && cache_dirty) begin
 							next_state = S_BACK;
 							ram_addr = {addr[31:4],4'b0};
@@ -142,9 +146,10 @@ module cmu (
 						ram_we = 0;
 						if (word_count == 2'b11)
 							next_state = S_FILL_WAIT;
-						else
+						else begin
 							next_state = S_FILL;
 							ram_addr = ram_addr + 4'b0100;
+						end
 					end else
 						next_word_count = word_count;
 				end
