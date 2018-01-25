@@ -66,7 +66,7 @@ module cmu (
 	assign en_w = we;
 	reg[1:0] word_count, next_word_count;
 
-	always @(posedge clk) begin
+	always @(negedge clk) begin
 		if(rst) begin
 			state = S_IDLE;
 			next_state = S_IDLE;
@@ -85,6 +85,8 @@ module cmu (
 							next_state = S_BACK;
 						end else begin
 							next_state = S_FILL; 
+							ram_addr = {addr[31:4],4'b0};
+
 						end
 					end
 				end
